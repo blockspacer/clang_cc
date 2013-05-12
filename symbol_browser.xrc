@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc">
+<object class="wxBitmap" name="browser_images">browser_images.png</object>
+<object class="wxBitmap" name="unknown">unknown.png</object>
+<object class="wxBitmap" name="unknown_protected">unknown-protected.png</object>
+<object class="wxBitmap" name="unknown_private">unknown-private.png</object>
+<object class="wxBitmap" name="namespace">namespace.png</object>
+<object class="wxBitmap" name="class">class.png</object>
+<object class="wxBitmap" name="class_protected">class-protected.png</object>
+<object class="wxBitmap" name="class_private">class-private.png</object>
+<object class="wxBitmap" name="struct">struct.png</object>
+<object class="wxBitmap" name="struct_protected">struct-protected.png</object>
+<object class="wxBitmap" name="struct_private">struct-private.png</object>
+<object class="wxBitmap" name="method">method.png</object>
+<object class="wxBitmap" name="method_protected">method-protected.png</object>
+<object class="wxBitmap" name="method_private">method-private.png</object>
+<object class="wxBitmap" name="member">member.png</object>
+<object class="wxBitmap" name="member_protected">member-protected.png</object>
+<object class="wxBitmap" name="member_private">member-private.png</object>
+<object class="wxBitmap" name="enum">enumerator.png</object>
+<object class="wxBitmap" name="enum_protected">enumerator-protected.png</object>
+<object class="wxBitmap" name="enum_private">enumerator-private.png</object>
+<object class="wxBitmap" name="typedef">typedef.png</object>
+<object class="wxBitmap" name="typedef_protected">typedef-protected.png</object>
+<object class="wxBitmap" name="typedef_private">typedef-private.png</object>
+<object class="wxBitmap" name="constant">constant.png</object>
+<object class="wxBitmap" name="constant_protected">constant-protected.png</object>
+<object class="wxBitmap" name="constant_private">constant-private.png</object>
+<object class="wxBitmap" name="template">template.png</object>
+<object class="wxBitmap" name="template_protected">template-protected.png</object>
+<object class="wxBitmap" name="template_private">template-private.png</object>
+<object class="wxBitmap" name="macro">symbol-macro.png</object>
+</resource>

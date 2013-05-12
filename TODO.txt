@@ -1,0 +1,69 @@
+1.Konfigurasyon'a parse edilebilecek file tiplerini ekle..
+
+
+LIBS = -lLLVMBitReader -lLLVMBitWriter  -lLLVMMC -lLLVMMCParser  -lLLVMSupport -lLLVMCore
+
+NOTLAR
+editor->GetFileName = E:\c++11.denemeler\mycpp_vc\classtest.cpp
+editor->GetShortName = classtest.cpp
+projectfile->GetBaseName = ..\mycpp_vc\classtest
+projectfile->RelativeFileName = ..\mycpp_vc\classtest.cpp
+projectfile->file->GetFullName = classtest.cpp
+projectfile->file->GetFullPath = E:\c++11.denemeler\mycpp_vc\classtest.cpp
+ASTUnit-> = getOriginalSourceFileName = E:\c++11.denemeler\mycpp_vc\classtest.cpp
+
+Declaration Tipleri
+0. AccessSpec
+1. Block
+2. ClassScopeFunctionSpecialization
+3. Empty
+4. FileScopeAsm
+5. Friend
+6. FriendTemplate
+7. Import
+8. LinkageSpec
+9. Label
+10. Namespace
+11. NamespaceAlias
+12. ObjCCompatibleAlias
+13. ObjCCategory
+14. ObjCCategoryImpl
+15. ObjCImplementation
+16. ObjCInterface
+17. ObjCProtocol
+18. ObjCMethod
+19. ObjCProperty
+20. ClassTemplate
+21. FunctionTemplate
+22. TypeAliasTemplate
+23. TemplateTemplateParm
+24. Enum
+25. Record
+26. CXXRecord
+27. ClassTemplateSpecialization
+28. ClassTemplatePartialSpecializatio
+29. TemplateTypeParm
+30. TypeAlias
+31. Typedef
+32. UnresolvedUsingTypename
+33. Using
+34. UsingDirective
+35. UsingShadow
+36. Field
+37. ObjCAtDefsField
+38. ObjCIvar
+39. Function
+40. CXXMethod
+41. CXXConstructor
+42. CXXConversion
+43. CXXDestructor
+44. NonTypeTemplateParm
+45. Var
+46. ImplicitParam
+47. ParmVar
+48. EnumConstant
+49. IndirectField
+50. UnresolvedUsingValue
+51. ObjCPropertyImpl
+52. StaticAssert
+53. TranslationUnit

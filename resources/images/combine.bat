@@ -1,0 +1,2 @@
+SET CONVERT_CMD=convert 
+%CONVERT_CMD%  unknown.png unknown-protected.png unknown-private.png namespace.png class.png class-protected.png class-private.png struct.png struct-protected.png struct-private.png method.png method-protected.png method-private.png member.png member-protected.png member-private.png enumerator.png enumerator-protected.png enumerator-private.png constant.png constant-protected.png constant-private.png typedef.png typedef-protected.png typedef-private.png template.png template-protected.png template-private.png macro.png +append browser_images.png
