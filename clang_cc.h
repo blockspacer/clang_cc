@@ -18,12 +18,13 @@
 #endif
 
 #include <cbplugin.h> // for "class cbToolPlugin"
-#include "symbolbrowser.h"
+
 #include "translationunitmanager.h"
 #include <map>
-
+class CodeLayoutView;
 class CodeCompletePopupWindow;
 class EditorCodeCompleteConsumer;
+class ccEvent;
 
 extern int idEditorGotoDeclaration;
 extern int idEditorGotoDefinition;
@@ -31,12 +32,10 @@ extern int idEditorGotoDefinition;
 class ClangCC : public cbCodeCompletionPlugin
 {
 public:
-    /** Constructor. */
     ClangCC();
-    /** Destructor. */
     virtual ~ClangCC();
 
-    /** Invoke configuration dialog. */
+    ///Invoke configuration dialog.
     virtual int Configure();
     virtual int GetConfigurationPriority() const { return 50; }
     virtual int GetConfigurationGroup() const { return cgUnknown; }
@@ -47,47 +46,47 @@ public:
     virtual int CodeComplete();
     virtual void ShowCallTip();
     virtual bool IsProviderFor(cbEditor* ed);
-    /** build menus in the main frame */
+    /// build menus in the main frame
     virtual void BuildMenu(wxMenuBar* menuBar);
-    /** build context menu */
+    /// build context menu
     virtual void BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data = 0);
     // Editor event handlers
-    /** SDK project related events */
-    void OnProjectActivated(CodeBlocksEvent& event);
+    // SDK project related events
     void OnProjectClosed(CodeBlocksEvent& event);
     void OnProjectSaved(CodeBlocksEvent& event);
     void OnProjectFileAdded(CodeBlocksEvent& event);
     void OnProjectFileRemoved(CodeBlocksEvent& event);
     void OnProjectFileChanged(CodeBlocksEvent& event);
-    /** SDK editor related events */
+    //SDK editor related events
     void OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent);
     void OnEditorSaveOrModified(CodeBlocksEvent& event);
-    void OnEditorOpen(CodeBlocksEvent& event);
     void OnEditorActivated(CodeBlocksEvent& event);
     void OnEditorClosed(CodeBlocksEvent& event);
     void OnEditorTooltip(CodeBlocksEvent& event);
-    /** Timer related events */
+    //Timer related events
     void OnEditorActivatedTimer(wxTimerEvent& event);
     void OnReparseTimer(wxTimerEvent& event);
-    /** Code completion events*/
+    // Clang events.
     void OnReparseFile(wxCommandEvent& event);
     void OnCodeComplete(CodeBlocksEvent& event);
     void OnMemoryUsage(wxCommandEvent& event);
-    // Called when a parsing is about to begin.
-    void OnParseStart(wxCommandEvent& event);
-    // Called after parsing ends.
-    void OnParseEnd(wxCommandEvent& event);
-    // Handles log messages
+    /// Called when a parsing is about to begin.
+    void OnParseStart(ccEvent& event);
+    /// Called after parsing ends.
+    void OnParseEnd(ccEvent& event);
+    /// Handles log messages
     void OnLogMessage(wxCommandEvent& event);
+    /// Saves the ast to the file;
+    void OnSaveAST(wxCommandEvent& event);
     // ContextMenu Handlers
     void OnGotoItemDeclaration(wxCommandEvent& event);
     void OnGotoItemDefinition(wxCommandEvent& event);
-    SymbolBrowser* GetSymbolBrowser() {return m_Browser;}
+    CodeLayoutView* GetLayoutView() {return m_View;}
 protected:
     virtual void OnAttach();
     virtual void OnRelease(bool appShutDown);
 private:
-     SymbolBrowser* m_Browser;
+     CodeLayoutView* m_View;
      CodeCompletePopupWindow* m_CCPopup;
      std::shared_ptr<EditorCodeCompleteConsumer> m_CCConsumer;
      //Convenience accessor
@@ -95,8 +94,11 @@ private:
      TranslationUnitManager m_TUManager;
      int m_LoggerIndex; // Index of Logger in LogManager
      int m_EditorHookId;
-     /** delay after receive editor activated event*/
-     wxTimer                 m_EditorActivatedTimer;
+
+
+     /** Delay after receive editor activated event*/
+     wxTimer  m_EditorActivatedTimer;
+     wxTimer  m_ReparseTimer;
      DECLARE_EVENT_TABLE()
 };
 

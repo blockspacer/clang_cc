@@ -5,7 +5,10 @@
 #include <clang/Lex/Lexer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
+#pragma push_macro("interface")
+#undef interface
 #include <clang/Frontend/ASTUnit.h>
+#pragma pop_macro("interface")
 #include <clang/AST/Attr.h>
 #include <clang/AST/Comment.h>
 #include <clang/Basic/SourceManager.h>
@@ -17,7 +20,7 @@ enum LocationCompare
 	Inside,
 	After
 };
-inline LocationCompare CompareLocationToRange(const SourceManager& SM,SourceLocation loc,SourceRange range)
+inline LocationCompare CompareLocationToRange(const SourceManager& SM, SourceLocation loc, SourceRange range)
 {
 	if (loc == range.getBegin() || loc == range.getEnd())
 		return Inside;
@@ -31,6 +34,7 @@ inline LocationCompare CompareLocationToRange(const SourceManager& SM,SourceLoca
 enum RefType
 {
    Namespace_Ref,
+   NamespaceAlias_Ref,
    Type_Ref
 };
 class RefNode
@@ -41,7 +45,7 @@ public:
        m_Referenced(decl),
        m_Loc(loc)
    {}
-   Decl* GetReferencedDeclaration()
+   const Decl* GetReferencedDeclaration() const
    {
        return m_Referenced;
    }
@@ -50,7 +54,7 @@ private:
     Decl* m_Referenced;
     SourceRange m_Loc;
 };
-typedef boost::variant<boost::blank,Decl*, Stmt*,TypeLoc,RefNode> NodeType;
+typedef boost::variant<boost::blank, Decl*, Stmt*, TypeLoc, RefNode> NodeType;
 //typedef llvm::PointerUnion4<Decl*,Stmt*,Attr*,PreprocessedEntity,TypeLoc*> NodeType;
 class ASTNodeFinder : public RecursiveASTVisitor<ASTNodeFinder>
 {
@@ -62,20 +66,14 @@ public:
 	NodeType GetASTNode(std::string fileName, unsigned pos);
 	NodeType GetASTNode(std::string fileName, unsigned line, unsigned column);
     bool shouldWalkTypesOfTypeLocs() const { return false; }
-	bool VisitNode(const NodeType& node,SourceRange range);
-//	bool VisitStmt(Stmt *S);
-	bool VisitDecl(Decl* D);
-	bool VisitTypeLoc(TypeLoc tloc);
-	bool VisitTagTypeLoc(TagTypeLoc T);
-	bool VisitTypedefTypeLoc(TypedefTypeLoc T);
+	bool VisitNode(const NodeType& node, SourceRange range);
     bool TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc tloc);
 
-#define DECL_VISIT_EXPR(EXPR)  \
-    bool Visit##EXPR(EXPR* expr); \
-
-    DECL_VISIT_EXPR(CXXThisExpr)
-    DECL_VISIT_EXPR(MemberExpr)
-    DECL_VISIT_EXPR(DeclRefExpr)
+    bool VisitStmt(Stmt *S);
+    bool VisitCXXThisExpr(CXXThisExpr* expr);
+	bool VisitDecl(Decl* decl);
+    bool VisitNamespaceAliasDecl(NamespaceAliasDecl* decl);
+    bool VisitTypeLoc(TypeLoc tloc);
 
 
 private:

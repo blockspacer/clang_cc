@@ -3,7 +3,7 @@
 
 
 #include <wx/popupwin.h>
-#include "cbEditor.h"
+#include <cbeditor.h>
 #include <wx/listctrl.h>
 #include "codecompletion.h"
 #include <clang/Sema/CodeCompleteConsumer.h>
@@ -25,8 +25,15 @@ public:
     void ClearItems();
 	void SetFilter(wxString filterString);
     bool IsActive();
-    void Activate();
+    bool Activate();
     void DeActivate();
+    ///This is introduced because wxWidgets can't
+    ///handle if an event handler is disconnected
+    ///during the dispatch and there are other handlers
+    ///connected to the event.This utilizes EVT_IDLE or
+    ///CallAfter() if the latter is present.
+    void DelayedDeactivate();
+    void OnIdle(wxIdleEvent& event);
 	/* EventHandlers */
 	void OnMouse(wxMouseEvent &event);
 	void OnItemActivated(wxListEvent& event);
@@ -49,12 +56,13 @@ private:
 	std::vector<CodeCompleteResultHolder> m_FilteredItems;
 	bool m_Active = false;
 	int m_CurrentPriorityIndex = 0;
-    static constexpr int m_PriorityArray[3] = {clang::CCP_LocalDeclaration,
+	wxPoint m_ScreenPoint;
+    static constexpr int m_PriorityArray[3] = {clang::CCP_MemberDeclaration,
                       clang::CCP_MemberDeclaration + clang::CCD_InBaseClass, //Include base class results
                       clang::CCP_NestedNameSpecifier};
 	cbEditor* m_Editor = nullptr;
 	cbStyledTextCtrl* m_Scintilla = nullptr;
-	wxPanel *m_panel;
+
 	wxImageList* m_ToolbarImages;
 	AutoCompList *m_CompleteListCtrl;
 	wxToolBar* m_FilterToolBar;

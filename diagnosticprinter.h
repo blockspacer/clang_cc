@@ -11,24 +11,31 @@ namespace clang
 {
     class ASTUnit;
 }
-inline constexpr int GetErrorIndicator()
+///Red squishy indicator for errors
+constexpr int GetErrorIndicator()
 {
     return 17;
 }
-inline constexpr int GetWarningIndicator()
+
+///Blue squishy indicator for warnings.
+constexpr int GetWarningIndicator()
 {
     return 18;
 }
+
 using namespace clang;
 class DiagnosticPrinter
 {
 public:
     DiagnosticPrinter(ASTUnit* tu);
+    /// Cleans error and warning indicators
+    /// from the editors
 	void CleanIndicators();
+	/// Marks the error and warnings emitted
+	/// by the ASTUnit creation on editors.
 	void MarkOnEditors();
 private:
     ASTUnit* m_TU;
-    std::set<std::string> m_Files;
 };
 
 

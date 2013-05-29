@@ -79,16 +79,30 @@
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
 								<object class="sizeritem">
-									<object class="wxRadioBox" name="rb_string_filter_type">
-										<label>Label</label>
-										<content>
-											<item>Short Hand</item>
-											<item>Acronym</item>
-										</content>
-										<default>-1</default>
-										<tooltip>Use shorthand or acronym filters when matching the entries in code complete list box. For example &lt;size&gt; matches &lt;GetSize&gt; in shorthand mode. It also matches &lt;specialize&gt; in acronym mode.</tooltip>
+									<object class="wxBoxSizer">
+										<object class="sizeritem">
+											<object class="wxRadioBox" name="rb_string_filter_type">
+												<label>Label</label>
+												<content>
+													<item>Short Hand</item>
+													<item>Acronym</item>
+												</content>
+												<default>-1</default>
+												<tooltip>Use shorthand or acronym filters when matching the entries in code complete list box. For example &lt;size&gt; matches &lt;GetSize&gt; in shorthand mode. It also matches &lt;specialize&gt; in acronym mode.</tooltip>
+											</object>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<border>5</border>
+										</object>
+										<object class="sizeritem">
+											<object class="wxCheckBox" name="chk_case_insensitive_filter">
+												<label>Case Insensitive</label>
+											</object>
+											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<border>5</border>
+											<option>1</option>
+										</object>
 									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 									<border>5</border>
 								</object>
 							</object>

@@ -1,12 +1,11 @@
-#include "Clang_cc.h"
+#include "clang_cc.h"
 #include <sdk.h> // Code::Blocks SDK
 #include <boost/thread.hpp>
 #include <configurationpanel.h>
 #include <logmanager.h>
-#include <boost/foreach.hpp>
 
-#include "symbolbrowser.h"
-#include "symbolbrowserASTvisitor.h"
+#include "codelayoutview.h"
+#include "codelayoutASTvisitor.h"
 #include "memoryusage.h"
 #include <cbstyledtextctrl.h>
 #include <editor_hooks.h>
@@ -14,13 +13,14 @@
 
 #include <clang/Lex/Lexer.h>
 #include "codecompletion.h"
-#include "Codecompletepopup.h"
+#include "codecompletepopup.h"
 #include "optionsdlg.h"
 #include "options.h"
 #include "diagnosticprinter.h"
 #include "ASTnodefinder.h"
 #include "contextmenubuilder.h"
 #include "tooltipevaluator.h"
+#include "ccevents.h"
 
 #define SCI_GETTEXT 2182
 
@@ -29,7 +29,7 @@
 // We are using an anonymous namespace so we don't litter the global one.
 namespace
 {
-    PluginRegistrant<ClangCC> reg(_T("Clang_cc"));
+    PluginRegistrant<ClangCC> reg(_T("clang_cc"));
 }
 
 int idEditorGotoDeclaration = wxNewId();
@@ -40,6 +40,7 @@ namespace
     int idMemoryUsage               = wxNewId();
     int idEditorActivatedTimer      = wxNewId();
     int idReparseTimer              = wxNewId();
+    int idSaveAST                   = wxNewId();
 }
 
 #define EDITOR_ACTIVATED_DELAY    300
@@ -49,8 +50,7 @@ BEGIN_EVENT_TABLE(ClangCC, cbCodeCompletionPlugin)
     EVT_TIMER(idReparseTimer, ClangCC::OnReparseTimer)
     EVT_MENU(idReparseFile, ClangCC::OnReparseFile)
     EVT_MENU(idMemoryUsage, ClangCC::OnMemoryUsage)
-    EVT_COMMAND(idParseStart, wxEVT_COMMAND_ENTER, ClangCC::OnParseStart)
-    EVT_COMMAND(idParseEnd, wxEVT_COMMAND_ENTER, ClangCC::OnParseEnd)
+    EVT_MENU(idSaveAST, ClangCC::OnSaveAST)
     EVT_COMMAND(idLogMessage, wxEVT_COMMAND_ENTER, ClangCC::OnLogMessage)
 
     EVT_MENU (idEditorGotoDeclaration,  ClangCC::OnGotoItemDeclaration)
@@ -61,9 +61,11 @@ END_EVENT_TABLE()
 
 using namespace clang;
 // constructor
+
 ClangCC::ClangCC():
     m_Mgr(Manager::Get()),
     m_EditorActivatedTimer(this, idEditorActivatedTimer),
+    m_ReparseTimer(this, idReparseTimer),
     m_TUManager(*this)
 {
     // Make sure our resources are available.
@@ -78,14 +80,15 @@ ClangCC::ClangCC():
 
 // destructor
 ClangCC::~ClangCC()
-{
-}
+{}
 
 void ClangCC::OnAttach()
 {
-    m_Browser = new SymbolBrowser(m_Mgr->GetAppWindow());
+    m_View = new CodeLayoutView(m_Mgr->GetAppWindow(), m_TUManager);
     m_CCPopup = new CodeCompletePopupWindow(m_Mgr->GetAppWindow());
-    m_Mgr->GetProjectManager()->GetNotebook()->AddPage(m_Browser, _("Clang_cc"));
+    m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, _("Clang_cc"));
+
+    //Setup logs.
     ClangCCLogger::Get()->Init(this);
 
     LogManager* logMgr = m_Mgr->GetLogManager();
@@ -95,10 +98,12 @@ void ClangCC::OnAttach()
     CodeBlocksLogEvent evt(cbEVT_ADD_LOG_WINDOW, m_LoggerIndex, logMgr->Slot(m_LoggerIndex).title, logMgr->Slot(m_LoggerIndex).icon);
     Manager::Get()->ProcessEvent(evt);
 
+    //Read options
+    Options::Get().Populate();
+    //Setup event handlers
     EditorHooks::HookFunctorBase* editorHook = new EditorHooks::HookFunctor<ClangCC>(this, &ClangCC::OnEditorEvent);
     m_EditorHookId = EditorHooks::RegisterHook(editorHook);
 
-    m_Mgr->RegisterEventSink(cbEVT_PROJECT_ACTIVATE,     new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectActivated));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_CLOSE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectClosed));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_SAVE,         new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectSaved));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_ADDED,   new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileAdded));
@@ -106,11 +111,17 @@ void ClangCC::OnAttach()
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_CHANGED, new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileChanged));
 
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_MODIFIED,      new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorSaveOrModified));
-    m_Mgr->RegisterEventSink(cbEVT_EDITOR_OPEN,          new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorOpen));
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_ACTIVATED,     new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorActivated));
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_TOOLTIP,       new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorTooltip));
 
     m_Mgr->RegisterEventSink(cbEVT_COMPLETE_CODE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnCodeComplete));
+
+    m_TUManager.Connect(ccEVT_PARSE_START, ccEventHandler(ClangCC::OnParseStart), nullptr, this);
+    m_TUManager.Connect(ccEVT_REPARSE_START, ccEventHandler(ClangCC::OnParseStart), nullptr, this);
+	m_TUManager.Connect(ccEVT_PARSE_END, ccEventHandler(ClangCC::OnParseEnd), nullptr, this);
+	m_TUManager.Connect(ccEVT_REPARSE_END, ccEventHandler(ClangCC::OnParseEnd), nullptr, this);
+
+
 }
 
 void ClangCC::OnRelease(bool appShutDown)
@@ -120,17 +131,23 @@ void ClangCC::OnRelease(bool appShutDown)
         EditorHooks::UnregisterHook(m_EditorHookId);
         m_Mgr->RemoveAllEventSinksFor(this);
 
-        int index = m_Mgr->GetProjectManager()->GetNotebook()->GetPageIndex(m_Browser);
+        int index = m_Mgr->GetProjectManager()->GetUI().GetNotebook()->GetPageIndex(m_View);
         if (index != -1)
-            m_Mgr->GetProjectManager()->GetNotebook()->RemovePage(index);
-        m_Browser->Destroy();
-        m_Browser = NULL;
+            m_Mgr->GetProjectManager()->GetUI().GetNotebook()->RemovePage(index);
+        m_View->Destroy();
+        m_View = nullptr;
         m_CCPopup->Destroy();
-        m_CCPopup = NULL;
+        m_CCPopup = nullptr;
 
         CodeBlocksLogEvent evt(cbEVT_REMOVE_LOG_WINDOW, m_LoggerIndex);
         Manager::Get()->ProcessEvent(evt);
         m_TUManager.Clear();
+
+        m_TUManager.Disconnect(ccEVT_PARSE_START, ccEventHandler(ClangCC::OnParseStart), nullptr, this);
+        m_TUManager.Disconnect(ccEVT_REPARSE_START, ccEventHandler(ClangCC::OnParseStart), nullptr, this);
+        m_TUManager.Disconnect(ccEVT_PARSE_END, ccEventHandler(ClangCC::OnParseEnd), nullptr, this);
+        m_TUManager.Disconnect(ccEVT_REPARSE_END, ccEventHandler(ClangCC::OnParseEnd), nullptr, this);
+
     }
 }
 
@@ -154,6 +171,7 @@ void ClangCC::BuildMenu(wxMenuBar* menuBar)
     wxMenu* clangCCMenu = new wxMenu();
     clangCCMenu->Append(idReparseFile,_("Reparse File"));
     clangCCMenu->Append(idMemoryUsage,_("Show Memory Usage"));
+    clangCCMenu->Append(idSaveAST, _("Save AST File"));
     menuBar->Insert(index + 1, clangCCMenu,_("&Clang_CC"));
 }
 void ClangCC::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
@@ -174,7 +192,7 @@ void ClangCC::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTre
             NodeType astNode = finder.GetASTNode(wx2std(fileName),
                                                  editor->GetControl()->GetCurrentPos());
             ContextMenuBuilder builder(menu);
-            boost::apply_visitor(builder,astNode);
+            boost::apply_visitor(builder, astNode);
 
         }
     }
@@ -193,10 +211,35 @@ void ClangCC::OnMemoryUsage(wxCommandEvent& event)
     if (projFile)
     {
         std::vector<ASTMemoryUsage> usages = m_TUManager.GetMemoryUsageForProjectFile(projFile);
-        MemoryUsageDlg dlg(Manager::Get()->GetAppWindow(),usages);
+        MemoryUsageDlg dlg(Manager::Get()->GetAppWindow(), usages);
         dlg.ShowModal();
     }
 }
+void ClangCC::OnSaveAST(wxCommandEvent& event)
+{
+    cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
+    if (!editor)
+        return;
+    ProjectFile* projFile = editor->GetProjectFile();
+    if(!projFile)
+        return;
+    ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
+    if(tu)
+    {
+        cbProject* project = projFile->GetParentProject();
+
+        wxString projectPath = project->GetBasePath();
+        wxFileName path(projectPath);
+        path.AppendDir(_T(".clang_ast"));
+        path.Mkdir();
+        wxString fileName = projFile->file.GetFullName() + _T(".ast");
+        std::string refPath = wx2std(path.GetPath(wxPATH_GET_SEPARATOR) + fileName);
+        tu->Save(refPath);
+    }
+
+
+}
+
 
 bool ClangCC::IsProviderFor(cbEditor* ed)
 {
@@ -285,15 +328,31 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
     {
         ClangCCLogger::Get()->Log(_T("wxEvt_SCI_CHARAdded "));
         wxChar chr = sciEvent.GetKey();
-        wxChar prevChr = control->GetCharAt(control->GetCurrentPos() - 2);
 
-        if (chr == _T('.') ||  /// after .
-            chr == _T('>') && prevChr == _T('-') || ///after ->
-            chr == _T(':') && prevChr == _T(':') || ///after ::
-            !m_CCPopup->IsActive() && iswalnum(chr) && iswalpha(prevChr))  /// after two characters and no active completion box
+        int currPos = control->GetCurrentPos();
+
+        //Do nothing if string/comment/character
+        int style = control->GetStyleAt(currPos);
+        if (control->IsString(style)   ||
+            control->IsComment(style)  ||
+            control->IsCharacter(style))
+        {
+            sciEvent.Skip();
+            return;
+        }
+
+        wxChar prevChr = control->GetCharAt(currPos - 2);
+
+        if (chr == '.'                   ||  // after .
+            chr == '>' && prevChr == '-' || //after ->
+            chr == ':' && prevChr == ':' || //after ::
+            !m_CCPopup->IsActive() && iswalnum(chr) && iswalpha(prevChr))  // after two characters and no active completion box
         {
             CodeComplete();
         }
+
+//        if (chr == ' ' || chr == '\t' || chr == '\n')
+//            m_HasResult = true;
     }
     sciEvent.Skip();
 
@@ -321,12 +380,12 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
                 ProjectFile* pairedFile = GetProjectFilePair(projFile);
                 if (pairedFile) projFile = pairedFile ;
             }
-            boost::thread(&TranslationUnitManager::CreateASTUnitForProjectFile,
+            boost::thread(&TranslationUnitManager::ParseProjectFile,
                           &m_TUManager,projFile,true);
         }
         if (tu)
         {
-            m_Browser->SetActiveFile(editor->GetFilename(),tu);
+            m_View->SetActiveFile(editor->GetFilename(),tu);
         }
     }
     ClangCCLogger::Get()->Log(_("Editor activated : ") + editor->GetFilename());
@@ -375,20 +434,21 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
         ASTNodeFinder finder(tu);
         NodeType node = finder.GetASTNode(wx2std(projFile->file.GetFullPath()), pos);
         ToolTipEvaluator ttEval(tu);
-        std::string toolTip = boost::apply_visitor(ttEval, node);
-        control->CallTipCancel();
-        control->CallTipShow(pos, std2wx(toolTip));
-
-
-
+        wxString toolTip = boost::apply_visitor(ttEval, node);
+        if (!toolTip.empty())
+        {
+            control->CallTipCancel();
+            control->CallTipShow(pos, toolTip);
+        }
     }
 }
-void ClangCC::OnParseStart(wxCommandEvent& event)
+void ClangCC::OnParseStart(ccEvent& event)
 {
   //TODO do something sensible
   int i=5;
+  event.Skip();
 }
-void ClangCC::OnParseEnd(wxCommandEvent& event)
+void ClangCC::OnParseEnd(ccEvent& event)
 {
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)
@@ -396,15 +456,20 @@ void ClangCC::OnParseEnd(wxCommandEvent& event)
     ProjectFile* editorFile = editor->GetProjectFile();
     if (!editorFile)
         return;
-    bool isReparse = event.GetInt();
-    ProjectFile* projFile = (ProjectFile*) event.GetClientData();
+    ProjectFile* projFile = event.GetProjectFile();
     ProjectFile* pairedFile = GetProjectFilePair(projFile);
     if (editorFile == projFile || editorFile == pairedFile)
     {
-        ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
+        ASTUnit* tu = event.GetTranslationUnit();
         if (tu)
-             m_Browser->SetActiveFile(editor->GetFilename(), tu, isReparse);
+        {
+            //Show diagnostics if any
+            DiagnosticPrinter printer(tu);
+            printer.MarkOnEditors();
+        }
+
     }
+    event.Skip();
 }
 void ClangCC::OnReparseTimer(wxTimerEvent& event)
 {
@@ -445,35 +510,9 @@ void ClangCC::OnGotoItemDeclaration(wxCommandEvent& event)
         NodeType astNode = finder.GetASTNode(wx2std(fileName),
                                              editor->GetControl()->GetCurrentPos());
 
-        if(astNode.type() == typeid(Decl*))
-           m_Browser->GotoDeclaration(boost::get<Decl*>(astNode));
-        if(astNode.type() == typeid(Stmt*))
-        {
-            if (DeclRefExpr* expr = clang::dyn_cast<DeclRefExpr>(boost::get<Stmt*>(astNode)))
-                m_Browser->GotoDeclaration(expr->getDecl());
-            if (MemberExpr* expr = clang::dyn_cast<MemberExpr>(boost::get<Stmt*>(astNode)))
-                m_Browser->GotoDeclaration(expr->getFoundDecl());
-        }
-        if(astNode.type() == typeid(RefNode))
-        {
-            RefNode refNode = boost::get<RefNode>(astNode);
-            m_Browser->GotoDeclaration(refNode.GetReferencedDeclaration());
-        }
-        if(astNode.type() == typeid(TypeLoc))
-        {
-            TypeLoc tloc = boost::get<TypeLoc>(astNode);
-            if(TagTypeLoc tagTloc = tloc.getAs<TagTypeLoc>())
-            {
-                Decl*  decl= tagTloc.getDecl();
-                m_Browser->GotoDeclaration(decl);
-            }
-            if(ArrayTypeLoc arrayTloc = tloc.getAs<ArrayTypeLoc>())
-            {
-               // arrayTloc.getElementLoc().getDecl();
-            }
-        }
-
-
+        const Decl* decl = ASTNode::GetDeclaration(astNode);
+        if(decl)
+            ASTNode::GotoDeclarationInEditor(decl);
     }
 
 }
@@ -485,16 +524,11 @@ void ClangCC::OnEditorSaveOrModified(CodeBlocksEvent& event)
 {
 
 }
-void ClangCC::OnEditorOpen(CodeBlocksEvent& event)
-{
 
-}
-void ClangCC::OnProjectActivated(CodeBlocksEvent& event)
-{
-
-}
 void ClangCC::OnProjectClosed(CodeBlocksEvent& event)
 {
+    cbProject* project = event.GetProject();
+    m_TUManager.RemoveProject(project);
 }
 void ClangCC::OnProjectSaved(CodeBlocksEvent& event)
 {
@@ -504,6 +538,8 @@ void ClangCC::OnProjectFileAdded(CodeBlocksEvent& event)
 }
 void ClangCC::OnProjectFileRemoved(CodeBlocksEvent& event)
 {
+    m_TUManager.RemoveFile(event.GetProject(), event.GetString());
+    event.Skip();
 }
 void ClangCC::OnProjectFileChanged(CodeBlocksEvent& event)
 {

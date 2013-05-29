@@ -2,33 +2,76 @@
 #ifndef OPTIONS_H_
 #define OPTIONS_H_
 #include <functional>
-#include "util.h"
+#include "stringio.h"
 #include "codecompletepopup.h"
-#include <boost/foreach.hpp>
+
 struct CCListedResultTypes
 {
-    CCListedResultTypes():
-        m_IncludeMacros(true),
-        m_IncludePatterns(true),
-        m_IncludeKeywords(true),
-        m_IncludeBriefComments(true)
-    {}
-    bool m_IncludeMacros;
-    bool m_IncludePatterns;
-    bool m_IncludeKeywords;
-    bool m_IncludeBriefComments;
+    bool m_IncludeMacros = true;
+    bool m_IncludePatterns = true;
+    bool m_IncludeKeywords = true;
+    bool m_IncludeBriefComments = true;
 };
+///
+struct ci_char_traits : public std::char_traits<char>
+{
+    static bool eq(char p, char q)
+    {
+        return std::tolower(p) == std::tolower(q);
+    }
+    static bool lt(char p, char q)
+    {
+        return std::tolower(p) < std::tolower(q);
+    }
+    static int compare(const char* p, const char* q, size_t n)
+    {
+        while(n--)
+        {
+            if (lt(*p,*q))
+                return -1;
+            if (lt(*q,*p))
+                return 1;
+            p++; q++;
+        }
+        return 0;
+    }
+};
+typedef std::basic_string<char, ci_char_traits> ci_string;
+//TODO consider matching from the start
 struct StringFilter
 {
 	StringFilter(const wxString& filter):
-	    m_FilterString(filter)
+	    m_FilterString(wx2std(filter))
 	{}
+	StringFilter(const std::string& filter):
+	    m_FilterString(filter)
+    {}
 	bool operator() (const CodeCompleteResultHolder& item) const
 	{
-	    wxString toMatch = std2wx(item.m_Ccs->getTypedText());
-		return m_FilterString.IsEmpty() || toMatch.Contains(m_FilterString);
+	    if (m_FilterString.empty())
+            return true;
+        std::string typedText = item.m_Ccs->getTypedText();
+        return typedText.find(m_FilterString) != std::string::npos;
 	}
-	wxString m_FilterString;
+	std::string m_FilterString;
+};
+
+struct StringFilterCaseInsensitive
+{
+	StringFilterCaseInsensitive(const wxString& filter):
+	    m_FilterString(wx2std(filter).c_str())
+	{}
+	StringFilterCaseInsensitive(const std::string& filter):
+	    m_FilterString(filter.c_str())
+    {}
+	bool operator() (const CodeCompleteResultHolder& item) const
+	{
+	    if (m_FilterString.empty())
+            return true;
+        ci_string typedText = item.m_Ccs->getTypedText();
+        return typedText.find(m_FilterString) != std::string::npos;
+	}
+	ci_string m_FilterString;
 };
 //Case Insensitive
 struct AcronymFilter
@@ -40,10 +83,11 @@ struct AcronymFilter
     {
         if (m_FilterString.IsEmpty())
             return true;
-        wxString::const_iterator it = m_FilterString.begin();
-	    BOOST_FOREACH(char i, item.m_Ccs->getTypedText())
+        auto it = m_FilterString.begin();
+        const char* typedText = item.m_Ccs->getTypedText();
+        while(*typedText)
 	    {
-            if (wxToupper(*it) == wxToupper(i))
+            if ((*it == *typedText++))
             {
                 ++it;
                 if (it == m_FilterString.end())
@@ -54,6 +98,31 @@ struct AcronymFilter
     }
     wxString m_FilterString;
 };
+struct AcronymFilterCaseInsensitive
+{
+    AcronymFilterCaseInsensitive(wxString filter):
+        m_FilterString(filter)
+    {}
+    bool operator() (const CodeCompleteResultHolder& item) const
+    {
+        if (m_FilterString.IsEmpty())
+            return true;
+        auto it = m_FilterString.begin();
+        const char* typedText = item.m_Ccs->getTypedText();
+        while(*typedText)
+	    {
+            if (wxToupper(*it) == wxToupper(*typedText++))
+            {
+                ++it;
+                if (it == m_FilterString.end())
+                    break;
+            }
+	    }
+        return it == m_FilterString.end();
+    }
+    wxString m_FilterString;
+};
+
 class Options :public wxEvtHandler
 {
 public:
@@ -75,6 +144,7 @@ private:
 private:
     CCListedResultTypes m_ListedResultTypes;
     StringFilterType m_StringFilter;
+    bool m_CaseInsensitiveFilter;
     bool m_SkipFunctionBodies;
     bool m_SpellCheck;
 

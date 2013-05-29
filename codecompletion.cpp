@@ -1,5 +1,6 @@
 #include "codecompletion.h"
-#include "Codecompletepopup.h"
+#include <clang/AST/Decl.h>
+#include "codecompletepopup.h"
 #include "options.h"
 #include "clangcclogger.h"
 
@@ -21,14 +22,14 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
-//      std::stable_sort(Results, Results + NumResults); //Sort By name
-//      ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by name executed in %ldms"), watch.Time()),Logger::info);
+//    std::stable_sort(Results, Results + NumResults); //Sort By name
+//    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by name executed in %ldms"), watch.Time()),Logger::info);
     std::vector<CodeCompleteResultHolder> out;
     switch(m_SortType)
     {
         case Priority:
-            std::stable_sort(Results, Results + NumResults ,
-            bind(std::less<unsigned>(), bind(&CodeCompletionResult::Priority,_1),bind(&CodeCompletionResult::Priority,_2)));
+            std::stable_sort(Results, Results + NumResults ,[] (const CodeCompletionResult& lhs, const CodeCompletionResult& rhs)
+                                                                { return lhs.Priority < rhs.Priority;});
             break;
     }
 #ifdef CLANGCC_TIMING
@@ -41,8 +42,23 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
         AccessSpecifier access = AS_none;
         if (Results[i].Kind == CodeCompletionResult::RK_Declaration)
         {
+            //Skip the overloaded operators,destructors and conversion ops
+            if (const FunctionDecl* funcDecl = dyn_cast<FunctionDecl>(Results[i].getDeclaration()))
+            {
+                if (funcDecl->isOverloadedOperator())
+                     continue;
+                switch (funcDecl->getDeclKind())
+                {
+                    case Decl::CXXDestructor:
+                    case Decl::CXXConversion:
+                        continue;
+                    default:
+                        break;
+                }
+            }
             access = Results[i].getDeclaration()->getAccess();
         }
+
         CodeCompletionString *ccs
             = Results[i].CreateCodeCompletionString(S, getAllocator(), m_TUInfo, includeBriefComments());
         //FIXME If cached results are used this fails miserably
@@ -58,11 +74,11 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
 //                                                      continue;
 //                                                    break;
 //        }
-        out.push_back(CodeCompleteResultHolder(Results[i], ccs, access));
+        out.emplace_back(Results[i], ccs, access);
     }
     m_CcPopup->SetItems(std::move(out));
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults executed in %ldms"), watch.Time()),Logger::info);
+    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults processed %d results in %ldms"), NumResults, watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
 }
 

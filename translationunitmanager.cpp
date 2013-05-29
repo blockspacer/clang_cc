@@ -8,12 +8,6 @@
 #include "macrosmanager.h"
 #include <cbstyledtextctrl.h>
 
-#include "clangcclogger.h"
-#include "clang_cc.h"
-#include "util.h"
-#include "diagnosticprinter.h"
-#include "options.h"
-
 #include <llvm/Support/Host.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <clang/Basic/TargetInfo.h>
@@ -21,14 +15,23 @@
 #include <clang/Lex/HeaderSearch.h>
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/FrontEnd/Utils.h>
+#include <clang/Frontend/Utils.h>
+#include <clang/Frontend/CompilerInstance.h>
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Lex/Preprocessor.h>
-#include <boost/foreach.hpp>
 
 
-int idParseStart    = wxNewId();
-int idParseEnd      = wxNewId();
+
+#include "ccevents.h"
+#include "clangcclogger.h"
+#include "clang_cc.h"
+#include "util.h"
+#include "diagnosticprinter.h"
+#include "options.h"
+
+
+
+
 
 using namespace clang;
 TranslationUnitManager::TranslationUnitManager(ClangCC& CC):
@@ -36,28 +39,7 @@ TranslationUnitManager::TranslationUnitManager(ClangCC& CC):
 {
 
 }
-void TranslationUnitManager::ParseFilesInProject(cbProject* proj)
-{
 
-    if (m_ProjectTranslationUnits.end() != m_ProjectTranslationUnits.find(proj))
-        return;
-    FilesList files = proj->GetFilesList();
-    ParserMapType parserMap;
-    for (FilesList::const_iterator it = files.begin(); it != files.end(); ++it)
-    {
-
-        ProjectFile* file = *it;
-        if (!IsCFamily(file->relativeFilename))
-            continue;
-        wxStatusBar* statusBar = Manager::Get()->GetAppFrame()->GetStatusBar();
-        if (statusBar)
-        {
-            Manager::Get()->GetAppFrame()->SetStatusText(_("Parsing File ")+file->relativeFilename);
-        }
-        ClangCCLogger::Get()->Log(_("Parsing File ")+file->relativeFilename);
-        CreateASTUnitForProjectFile(file);
-    }
-}
 bool TranslationUnitManager::AddASTUnitForProjectFile(ProjectFile* file, ASTUnit* tu)
 {
     cbAssert (file && file->file.FileExists() && "File does not exist.");
@@ -66,19 +48,28 @@ bool TranslationUnitManager::AddASTUnitForProjectFile(ProjectFile* file, ASTUnit
     if (proj)
     {
         boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
-        m_ProjectTranslationUnits[proj].insert(std::make_pair(file,std::shared_ptr<ASTUnit>(tu)));
+        m_ProjectTranslationUnits[proj].insert(std::make_pair(file->file.GetFullPath(),
+                                               std::shared_ptr<ASTUnit>(tu)));
         return true;
     }
     return false;
 }
-ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,bool allowAdd)
+
+ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAdd)
 {
     cbAssert (file && file->file.FileExists() && "File not exists");
 
-    wxCommandEvent startEvent(wxEVT_COMMAND_ENTER,idParseStart);
-    startEvent.SetInt(0); //Parse Indicator
-    startEvent.SetClientData(file);
-    m_CC.AddPendingEvent(startEvent);
+    {   //if the file is already being parsed return immediately.
+        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
+        if (it != m_FilesBeingParsed.end())
+            return nullptr;
+        m_FilesBeingParsed.push_back(file);
+    }
+    wxString fileName = file->file.GetFullPath();
+    //Parsing started event.
+    ccEvent startEvent(ccEVT_PARSE_START, fileName, nullptr, file);
+    AddPendingEvent(startEvent);
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
@@ -89,7 +80,7 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
     args.push_back("-x");
     if (file->compilerVar == _("CC")) // it is a C file
         args.push_back("c");
-    else
+    else //else treat as a c++ file
         args.push_back("c++");
     args.push_back("-fsyntax-only");
     if (!Options::Get().ShouldSpellCheck())
@@ -104,7 +95,6 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
     // Using command line here so clang could find(hopefully) system headers via Driver.
     CompilerInvocation* invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(&args[0],&args[0] + args.size()),
                                                                            diags);
-
    //Add project wide definitions and include paths.
     MacrosManager* macrosMgr = Manager::Get()->GetMacrosManager();
     const wxArrayString& macros = file->GetParentProject()->GetCompilerOptions();
@@ -118,7 +108,9 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
             invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
         }
     }
-    for (auto includePath : file->GetParentProject()->GetIncludeDirs())
+    const wxArrayString& includeDirs = file->GetParentProject()->GetIncludeDirs();
+
+    for (auto includePath : includeDirs)
     {
         macrosMgr->ReplaceMacros(includePath);
         wxFileName path = wxFileName::DirName(includePath);
@@ -150,7 +142,7 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
                     invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
                 }
             }
-            for (auto &includePath : target->GetIncludeDirs())
+            for (auto includePath : target->GetIncludeDirs())
             {
                 macrosMgr->ReplaceMacros(includePath, target);
                 wxFileName path = wxFileName::DirName(includePath);
@@ -171,7 +163,7 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
 
 
     ASTUnit* ast = ASTUnit::LoadFromCompilerInvocation(invocation,diags,
-                                                       false, /* OnlyLocalDecls */
+                                                       true, /* OnlyLocalDecls */
                                                        true, /*CaptureDiagnostics*/
                                                        true, /*PrecompilePreamble*/
                                                        TU_Complete,
@@ -188,38 +180,41 @@ ASTUnit* TranslationUnitManager::CreateASTUnitForProjectFile(ProjectFile* file,b
     {
         if (allowAdd)
             AddASTUnitForProjectFile(file,ast);
-        //Show stored diagnostics on the log and the editor
-        DiagnosticPrinter printer(ast);
-        printer.MarkOnEditors();
     }
 
-    wxCommandEvent endEvent(wxEVT_COMMAND_ENTER,idParseEnd);
-    endEvent.SetInt(0); //Parse Indicator
-    endEvent.SetClientData(file);
-    m_CC.AddPendingEvent(endEvent);
+    {   //File is free again
+        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
+    }
+    //Parsing ended event
+    ccEvent endEvent(ccEVT_PARSE_END, fileName, ast, file);
+    AddPendingEvent(endEvent);
+
     return ast;
 }
+
 ASTUnit* TranslationUnitManager::GetASTUnitForProjectFile(ProjectFile* file)
 {
     cbAssert (file && file->file.FileExists() && "File not exists");
 
     cbProject* proj = file->GetParentProject();
-    bool isHeader = IsHeaderFile(file->file.GetFullName());
+    wxString fileName = file->file.GetFullPath();
+    bool isHeader = IsHeaderFile(fileName);
     boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
     auto it = m_ProjectTranslationUnits.find(proj);
     if (it != m_ProjectTranslationUnits.end())
     {
         auto& fileMap =(*it).second;
-        auto it = fileMap.find(file);
+        auto it = fileMap.find(fileName);
         if ( it != fileMap.end())
             return (*it).second.get();
-        // if it's a header file check whether a AST exists for sourcefile with the same name.
+        // if it's a header file check whether an AST exists for sourcefile with the same base name .
         if (isHeader)
         {
             ProjectFile* sourceFile = GetProjectFilePair(file);
             if (sourceFile)
             {
-                it = fileMap.find(sourceFile);
+                it = fileMap.find(sourceFile->file.GetFullPath());
                 if (it != fileMap.end())
                     return (*it).second.get();
             }
@@ -227,16 +222,26 @@ ASTUnit* TranslationUnitManager::GetASTUnitForProjectFile(ProjectFile* file)
     }
     return nullptr;
 }
+
 ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 {
-    wxCommandEvent startEvent(wxEVT_COMMAND_ENTER,idParseStart);
-    startEvent.SetInt(1); //Reparse Indicator
-    startEvent.SetClientData(file);
-    m_CC.AddPendingEvent(startEvent);
+    {   //if the file is already being parsed return immediately.
+        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
+        if (it != m_FilesBeingParsed.end())
+            return nullptr;
+        m_FilesBeingParsed.push_back(file);
+    }
+
+    wxString fileName = file->file.GetFullPath();
+
+    ccEvent startEvent(ccEVT_REPARSE_START, fileName, nullptr, file);
+    AddPendingEvent(startEvent);
+
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
-    wxString fileName = file->file.GetFullPath();
+
     cbStyledTextCtrl* control = Manager::Get()->GetEditorManager()->GetBuiltinEditor(fileName)->GetControl();
     SmallVector<ASTUnit::RemappedFile,1> remappedFiles;
     if (control->GetModify())
@@ -250,27 +255,33 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 
     ASTUnit* tu = GetASTUnitForProjectFile(file);
     if (!tu)
-    {
-        tu = CreateASTUnitForProjectFile(file);
-    }
+        tu = ParseProjectFile(file);
+
     if (!tu || tu->Reparse(remappedFiles.data(),remappedFiles.size()))
-    {
          ClangCCLogger::Get()->Log(_("\t Reparsing Failed : ")+ file->file.GetFullName());
-    }
-    else //Show diagnostics if any
-    {
-        DiagnosticPrinter printer(tu);
-        printer.MarkOnEditors();
-    }
+
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("Reparsing completed in %ldms"), watch.Time()),Logger::info);
+    ClangCCLogger::Get()->Log(wxString::Format(_("Reparsing completed in %ldms"), watch.Time()), Logger::info);
 #endif // CLANGCC_TIMING
-    wxCommandEvent endEvent(wxEVT_COMMAND_ENTER,idParseEnd);
-    endEvent.SetInt(1); //Reparse Indicator
-    endEvent.SetClientData(file);
-    m_CC.AddPendingEvent(endEvent);
+
+    {   //File is free again
+        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
+    }
+
+    ccEvent endEvent(ccEVT_REPARSE_END, fileName, tu, file);
+    AddPendingEvent(endEvent);
     return tu;
 
+}
+
+bool TranslationUnitManager::IsFileBeingParsed(ProjectFile* file)
+{
+    boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+    auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
+    if (it != m_FilesBeingParsed.end())
+        return true;
+    return false;
 }
 std::vector<ASTMemoryUsage> TranslationUnitManager::GetMemoryUsageForProjectFile(ProjectFile* file)
 {
@@ -280,29 +291,46 @@ std::vector<ASTMemoryUsage> TranslationUnitManager::GetMemoryUsageForProjectFile
     {
         //AST Context
         ASTContext& ctx = tu->getASTContext();
-        usages.push_back(ASTMemoryUsage(AST_Nodes,ctx.getASTAllocatedMemory()));
-        usages.push_back(ASTMemoryUsage(AST_Identifiers,ctx.Idents.getAllocator().getTotalMemory()));
-        usages.push_back(ASTMemoryUsage(AST_Selectors,ctx.Selectors.getTotalMemory()));
-        usages.push_back(ASTMemoryUsage(AST_SideTables,ctx.getSideTableAllocatedMemory()));
+        usages.emplace_back(AST_Nodes, ctx.getASTAllocatedMemory());
+        usages.emplace_back(AST_Identifiers, ctx.Idents.getAllocator().getTotalMemory());
+        usages.emplace_back(AST_Selectors, ctx.Selectors.getTotalMemory());
+        usages.emplace_back(AST_SideTables, ctx.getSideTableAllocatedMemory());
 
         //Source Manager
-        usages.push_back(ASTMemoryUsage(SM_ContentCache,ctx.getSourceManager().getContentCacheSize()));
+        usages.emplace_back(SM_ContentCache, ctx.getSourceManager().getContentCacheSize());
         const SourceManager::MemoryBufferSizes& srcBufs = tu->getSourceManager().getMemoryBufferSizes();
-        usages.push_back(ASTMemoryUsage(SM_Malloc,srcBufs.malloc_bytes));
-        usages.push_back(ASTMemoryUsage(SM_Mmap,srcBufs.mmap_bytes));
-        usages.push_back(ASTMemoryUsage(SM_DataStructures,tu->getSourceManager().getDataStructureSizes()));
+        usages.emplace_back(SM_Malloc, srcBufs.malloc_bytes);
+        usages.emplace_back(SM_Mmap, srcBufs.mmap_bytes);
+        usages.emplace_back(SM_DataStructures, tu->getSourceManager().getDataStructureSizes());
         // Preprocessor
         Preprocessor& PP = tu->getPreprocessor();
-        usages.push_back(ASTMemoryUsage(PP_Total,PP.getTotalMemory()));
-        usages.push_back(ASTMemoryUsage(PP_HeaderSearch,PP.getHeaderSearchInfo().getTotalMemory()));
+        usages.emplace_back(PP_Total, PP.getTotalMemory());
+        usages.emplace_back(PP_HeaderSearch, PP.getHeaderSearchInfo().getTotalMemory());
         if (PP.getPreprocessorOpts().DetailedRecord)
-            usages.push_back(ASTMemoryUsage(PP_PreprocessingRecord,PP.getPreprocessingRecord()->getTotalMemory()));
+            usages.emplace_back(ASTMemoryUsage(PP_PreprocessingRecord, PP.getPreprocessingRecord()->getTotalMemory()));
     }
     return usages;
 }
+
 void TranslationUnitManager::Clear()
 {
+    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
     m_ProjectTranslationUnits.clear();
 }
 
+void TranslationUnitManager::RemoveFile(cbProject* project,const wxString& fileName)
+{
+    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    //Not many projects so no worries
+    for (auto & it : m_ProjectTranslationUnits)
+    {
+        if(it.first == project)
+            it.second.erase(fileName);
+    }
+}
 
+void TranslationUnitManager::RemoveProject(cbProject* project)
+{
+    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    m_ProjectTranslationUnits.erase(project);
+}

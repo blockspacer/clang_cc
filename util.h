@@ -3,7 +3,6 @@
 
 #include <string>
 #include <wx/string.h>
-#include <boost/foreach.hpp>
 #include "filefilters.h"
 #include <clang/AST/Decl.h>
 #include <clang/Sema/CodeCompleteConsumer.h>
@@ -15,32 +14,6 @@
 #define SCI_GETTEXT 2182
 
 using namespace clang;
-inline wxString std2wx(const std::string& s)
-{
-     wxString wx;
-     const char* my_string=s.c_str();
-     wxMBConvUTF8 *wxconv= new wxMBConvUTF8();
-     wx=wxString(wxconv->cMB2WC(my_string),wxConvUTF8);
-     delete wxconv;
-     // test if conversion works of not. In case it fails convert from Ascii
-     if (wx.length()==0)
-       wx=wxString(wxString::FromAscii(s.c_str()));
-     return wx;
-}
-inline std::string wx2std(const wxString& s)
-{
-     std::string s2;
-     if (s.IsAscii())
-     {
-       s2=s.ToAscii();
-     } else
-     {
-       const wxWX2MBbuf tmp_buf = wxConvCurrent->cWX2MB(s);
-       const char *tmp_str = (const char*) tmp_buf;
-       s2=std::string(tmp_str, strlen(tmp_str));
-     }
-     return s2;
-}
 
 inline bool IsHeaderFile(wxString name)
 {
@@ -85,7 +58,8 @@ inline ProjectFile* GetProjectFilePair(ProjectFile* file)
     }
     return nullptr;
 }
-enum ImageKind
+// c++11 style enum to prevent name clashes.
+enum class ImageKind
 {
     Unknown = 0,
     NameSpace = 3,
@@ -99,82 +73,83 @@ enum ImageKind
     Template = 25,
     Macro = 28
 };
-inline int GetImageIndexForDeclaration(Decl* node)
+inline unsigned GetImageIndexForDeclaration(Decl* node)
 {
     ImageKind kind;
     Decl::Kind declKind = node->getKind();
     switch(declKind)
     {
-       case Decl::Namespace: kind = NameSpace;
+       case Decl::Namespace: kind = ImageKind::NameSpace;
                              break;
-       case Decl::CXXRecord: kind = Class;
+       case Decl::CXXRecord: kind = ImageKind::Class;
                              break;
-       case Decl::ClassTemplatePartialSpecialization: kind = Template;
+       case Decl::ClassTemplateSpecialization:
+       case Decl::ClassTemplatePartialSpecialization: kind = ImageKind::Template;
                                                       break;
-       case Decl::Record:    kind = Struct;
+       case Decl::Record:    kind = ImageKind::Struct;
                              break;
        case Decl::CXXMethod:
        case Decl::CXXConstructor:
        case Decl::CXXDestructor:
-       case Decl::Function : kind = Method;
+       case Decl::Function : kind = ImageKind::Method;
                              break;
        case Decl::Var:
-       case Decl::Field    : kind = Member;
+       case Decl::Field    : kind = ImageKind::Member;
                              break;
-       case Decl::Enum     : kind = Enum;
+       case Decl::Enum     : kind = ImageKind::Enum;
                              break;
-       case Decl::EnumConstant: kind = Constant;
+       case Decl::EnumConstant: kind = ImageKind::Constant;
                                 break;
-       case Decl::Typedef  : kind = Typedef;
+       case Decl::Typedef  : kind = ImageKind::Typedef;
                              break;
-       default :   kind = Unknown;
+       default :   kind = ImageKind::Unknown;
     }
     AccessSpecifier access = node->getAccess();
     if (access == AS_none)
         access = AS_public; //For all intents and purposes
-    return kind + access;
+    return static_cast<unsigned>(kind) + access;
 }
 inline int GetImageIndexForCompletionResult(const CodeCompletionResult& result, AccessSpecifier access)
 {
     ImageKind kind;
     switch(result.CursorKind)
     {
-        case CXCursor_Namespace:  kind = NameSpace;
+        case CXCursor_Namespace:  kind = ImageKind::NameSpace;
                                   break;
-        case CXCursor_ClassDecl:  kind = Class;
+        case CXCursor_ClassDecl:  kind = ImageKind::Class;
                                   break;
         case CXCursor_StructDecl:
-             CXCursor_UnionDecl:  kind = Struct;
+             CXCursor_UnionDecl:  kind =ImageKind::Struct;
                                   break;
         case CXCursor_CXXMethod:
         case CXCursor_FunctionDecl:
         case CXCursor_Constructor:
-        case CXCursor_Destructor: kind = Method;
+        case CXCursor_Destructor: kind = ImageKind::Method;
                                   break;
         case CXCursor_ParmDecl:
         case CXCursor_FieldDecl:
-        case CXCursor_VarDecl:    kind = Member;
+        case CXCursor_VarDecl:    kind = ImageKind::Member;
                                   break;
         //Maybe separate those or put in constant category.
         case CXCursor_EnumConstantDecl:
-        case CXCursor_EnumDecl:   kind = Enum;
+        case CXCursor_EnumDecl:   kind = ImageKind::Enum;
                                   break;
         //C++11 type alias
         case CXCursor_TypeAliasDecl:
-        case CXCursor_TypedefDecl:kind = Typedef;
+        case CXCursor_TypedefDecl:kind = ImageKind::Typedef;
                                   break;
         case CXCursor_ClassTemplate:
         case CXCursor_ClassTemplatePartialSpecialization :
-                                  kind = Template;
+                                  kind = ImageKind::Template;
                                   break;
         case CXCursor_MacroDefinition:
-                                  kind = Macro;
+                                  kind = ImageKind::Macro;
                                   break;
-        default : kind = Unknown;
+        default : kind = ImageKind::Unknown;
     }
     if (access == AS_none)
         access = AS_public; //For all intents and purposes
-    return kind + access;
+    return static_cast<unsigned>(kind) + access;
 
 }
 

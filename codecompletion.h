@@ -65,6 +65,7 @@ public:
                                            unsigned NumCandidates);
     virtual clang::CodeCompletionAllocator &getAllocator();
     virtual clang::CodeCompletionTUInfo &getCodeCompletionTUInfo();
+    virtual ~EditorCodeCompleteConsumer() {}
 private:
     clang::CodeCompletionTUInfo m_TUInfo;
     CodeCompleteSortType m_SortType;

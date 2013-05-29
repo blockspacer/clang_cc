@@ -1,8 +1,9 @@
 #include "autocomplist.h"
 #include "clangcclogger.h"
-#include "Codecompletepopup.h"
+#include "codecompletepopup.h"
 #include "wx/imaglist.h"
 #include "wx/xrc/xh_all.h"
+#include <wx/settings.h>
 #include <algorithm>
 #include <boost/range.hpp>
 #include <boost/range/adaptors.hpp>
@@ -14,6 +15,7 @@ AutoCompList::AutoCompList(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
 {
 	InsertColumn(0, _("TypedText"));
     wxImageList* imglist = new wxImageList(16,16,true,0);
+    //SetBackgroundColour(wxColour(0,0,255));
 	imglist->Add(wxXmlResource::Get()->LoadBitmap(_("browser_images")));
 	AssignImageList(imglist, wxIMAGE_LIST_SMALL);
 }
@@ -25,13 +27,14 @@ wxString AutoCompList::OnGetItemText(long item, long column) const
 
 int AutoCompList::OnGetItemImage(long item) const
 {
-   CodeCompletePopupWindow* grandPa = static_cast<CodeCompletePopupWindow*>(GetGrandParent());
+   CodeCompletePopupWindow* grandPa = static_cast<CodeCompletePopupWindow*>(GetParent());
    return grandPa->GetFilteredImageIndex(item);
 }
 
 void AutoCompList::SetItems(std::vector<wxString> items)
 {
    m_FilteredItems = items;
+
    SetItemCount(m_FilteredItems.size());
    ClangCCLogger::Get()->Log(wxString::Format(_("%d items for CodeCompleteList."),m_FilteredItems.size()));
    DoLayout();
@@ -56,21 +59,25 @@ void AutoCompList::DoLayout()
 	if (!m_FilteredItems.empty())
 	{
         long firstVisible = GetTopItem();
-        int last = std::min<unsigned long>(m_FilteredItems.size() - firstVisible, 20);
-		wxSize widest = *boost::max_element(m_FilteredItems | sliced(firstVisible,firstVisible + last)  //Should be quick enough
-                                                            | transformed(boost::bind(&AutoCompList::GetTextExtent, this, _1)),
-                                              boost::bind(std::less<int>(), boost::bind(&wxSize::GetWidth, _1), boost::bind(&wxSize::GetWidth, _2)));
+        int last = std::min<unsigned long>(m_FilteredItems.size() - firstVisible, 100);
+		wxString widest = *boost::max_element(m_FilteredItems | sliced(firstVisible,firstVisible + last),  //Should be quick enough
+                                                              [this] (const wxString& lhs, const wxString& rhs)
+                                                              {
+                                                                    return GetTextExtent(lhs).GetWidth() < GetTextExtent(rhs).GetWidth();
+                                                              });
 
-        int maxWidth = std::min(widest.GetWidth() + 30, MAX_WIDTH); //some padding to count the images in
-		SetColumnWidth(0,maxWidth);
+        int scrollBarWidth = wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
+        int maxWidth = std::min(GetTextExtent(widest).GetWidth() + 30, MAX_WIDTH); //some padding to count the images in
+		SetColumnWidth(0 ,maxWidth);
 		wxRect rect;
-		GetItemRect(0,rect);
+		GetItemRect(0, rect);
 		int height = rect.GetHeight() * m_FilteredItems.size();
-		SetClientSize(maxWidth, std::min(height,MAX_HEIGHT));
+		int maxHeight = rect.GetHeight() * ROW_COUNT;
+		SetClientSize(maxWidth, std::min(height, maxHeight));
 	}
 	Refresh();
 }
-#if !wxCHECK_VERSION(2, 9, 4)
+#if !wxCHECK_VERSION(2, 9, 5)
 wxSize AutoCompList::GetTextExtent(const wxString& string)
 {
     wxCoord w,h;

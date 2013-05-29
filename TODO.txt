@@ -1,8 +1,6 @@
 1.Konfigurasyon'a parse edilebilecek file tiplerini ekle..
 
 
-LIBS = -lLLVMBitReader -lLLVMBitWriter  -lLLVMMC -lLLVMMCParser  -lLLVMSupport -lLLVMCore
-
 NOTLAR
 editor->GetFileName = E:\c++11.denemeler\mycpp_vc\classtest.cpp
 editor->GetShortName = classtest.cpp

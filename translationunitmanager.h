@@ -2,11 +2,8 @@
 #define TRANSLATIONUNITMANAGER_H_
 
 #include <map>
+#include <vector>
 #include <wx/string.h>
-#include <manager.h>
-#include <logmanager.h>
-#include <editormanager.h>
-#include <cbeditor.h>
 #include <boost/thread.hpp>
 // interface is macroed somewhere in mingw
 // not exactly portable but works for gcc,MSVC and clang
@@ -15,12 +12,17 @@
 #include <clang/Frontend/ASTUnit.h>
 #pragma pop_macro("interface")
 
+#include <manager.h>
+#include <logmanager.h>
+#include <editormanager.h>
+#include <cbeditor.h>
+
 
 class ClangCC;
-extern int idParseStart;
-extern int idParseEnd;
 
-typedef std::map<ProjectFile*,std::shared_ptr<clang::ASTUnit> > ParserMapType;
+
+
+typedef std::map<wxString,std::shared_ptr<clang::ASTUnit> > ParserMapType;
 
 enum ASTUnitMemoryUsageKind
 {
@@ -48,23 +50,27 @@ struct ASTMemoryUsage
 
 using clang::ASTUnit;
 
-class TranslationUnitManager
+class TranslationUnitManager:public wxEvtHandler
 {
 public:
     TranslationUnitManager(ClangCC& CC);
     TranslationUnitManager(const TranslationUnitManager&) = delete;
     TranslationUnitManager& operator = (const TranslationUnitManager&) = delete;
-    void ParseFilesInProject(cbProject* proj);
     ASTUnit* GetASTUnitForProjectFile(ProjectFile* file);
-    ASTUnit* CreateASTUnitForProjectFile(ProjectFile* file,bool add = true);
+    ASTUnit* ParseProjectFile(ProjectFile* file,bool add = true);
     bool     AddASTUnitForProjectFile(ProjectFile* file, ASTUnit* tu);
     ASTUnit* ReparseProjectFile(ProjectFile* file);
+    bool IsFileBeingParsed(ProjectFile* file);
     std::vector<ASTMemoryUsage> GetMemoryUsageForProjectFile(ProjectFile* file);
+    void RemoveProject(cbProject* project);
+    void RemoveFile(cbProject* project,const wxString& fileName);
     void Clear();
 private:
     std::map<cbProject*,ParserMapType> m_ProjectTranslationUnits;
+    std::vector<ProjectFile*> m_FilesBeingParsed;
     ClangCC& m_CC;
     boost::mutex m_ProjectsMapMutex;
+    boost::mutex m_FilesBeingParsedMutex;
 };
 
 #endif // TRANSLATIONUNITMANAGER_H_

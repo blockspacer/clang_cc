@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_plugin_manifest_file>
-    <SdkVersion major="1" minor="13"  release="14" />
-    <Plugin name="Clang_cc">
-        <Value title="Clang_cc" />
+    <SdkVersion major="1" minor="11"  release="12" />
+    <Plugin name="clang_cc">
+        <Value title="clang_cc" />
         <Value version="0.1" />
         <Value description="" />
         <Value author="hurcan solter" />

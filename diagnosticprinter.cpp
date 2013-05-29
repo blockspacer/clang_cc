@@ -6,26 +6,21 @@
 #include <editormanager.h>
 #include <cbeditor.h>
 #include <cbstyledtextctrl.h>
+#include <logmanager.h>
+#include "stringio.h"
 
 DiagnosticPrinter::DiagnosticPrinter(ASTUnit* tu):
     m_TU(tu)
 {
-    auto it = m_TU->stored_diag_begin();
-    for (;it != m_TU->stored_diag_end(); ++it)
-    {
-        StoredDiagnostic diag = *it;
-        FullSourceLoc loc = diag.getLocation();
-        std::string fileName = loc.getManager().getFilename(loc);
-        m_Files.insert(fileName);
-    }
     CleanIndicators();
 }
 
 void DiagnosticPrinter::CleanIndicators()
 {
-    BOOST_FOREACH(std::string fileName, m_Files)
+    for (int i = 0; i < Manager::Get()->GetEditorManager()->GetEditorsCount(); ++i)
     {
-        cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(std2wx(fileName));
+
+        cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(i);
         if(editor)
         {
             cbStyledTextCtrl* control = editor->GetControl();
@@ -39,12 +34,10 @@ void DiagnosticPrinter::CleanIndicators()
 void DiagnosticPrinter::MarkOnEditors()
 {
     auto it = m_TU->stored_diag_begin();
-    for (;it != m_TU->stored_diag_end(); ++it)
+    for (; it != m_TU->stored_diag_end(); ++it)
     {
         StoredDiagnostic diag = *it;
         FullSourceLoc loc = diag.getLocation();
-        const SourceManager& srcMgr = loc.getManager();
-        std::string fileName = srcMgr.getFilename(loc);
 
         DiagnosticsEngine::Level level= diag.getLevel();
         Logger::level diagLevel;
@@ -65,11 +58,16 @@ void DiagnosticPrinter::MarkOnEditors()
             default:
                 diagLevel = Logger::info;
         }
-        ClangCCLogger::Get()->Log(std2wx(diag.getMessage()),diagLevel);
-
-        cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(std2wx(fileName));
-        if(editor && loc.isValid())
+        ClangCCLogger::Get()->Log(std2wx(diag.getMessage()), diagLevel);
+        if (loc.isValid())
         {
+            const SourceManager& srcMgr = loc.getManager();
+            ClangCCLogger::Get()->Log(std2wx(loc.printToString(srcMgr)), diagLevel);
+            std::string fileName = srcMgr.getFilename(loc);
+
+            cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(std2wx(fileName));
+            if(!editor)
+                return;
             cbStyledTextCtrl* control = editor->GetControl();
             unsigned offset = srcMgr.getFileOffset(loc);
             unsigned selRange = Lexer::MeasureTokenLength(loc, srcMgr, m_TU->getASTContext().getLangOpts());
@@ -80,13 +78,13 @@ void DiagnosticPrinter::MarkOnEditors()
                     control->IndicatorSetStyle(GetErrorIndicator(), wxSCI_INDIC_SQUIGGLE);
                     control->IndicatorSetForeground(GetErrorIndicator(), wxColour(255,0,0));
                     control->SetIndicatorCurrent(GetErrorIndicator());
-                    control->IndicatorFillRange(offset,selRange);
+                    control->IndicatorFillRange(offset, selRange);
                     break;
                 case DiagnosticsEngine::Warning :
                     control->IndicatorSetStyle(GetWarningIndicator(), wxSCI_INDIC_SQUIGGLE);
                     control->IndicatorSetForeground(GetWarningIndicator(), wxColour(0,0,255));
                     control->SetIndicatorCurrent(GetWarningIndicator());
-                    control->IndicatorFillRange(offset,selRange);
+                    control->IndicatorFillRange(offset, selRange);
                     break;
             }
         }

@@ -26,6 +26,7 @@ void ClangCCLogger::Init(wxEvtHandler* parent)
 void ClangCCLogger::Log(const wxString& msg, Logger::level lv)
 {
     wxCommandEvent logEvent(wxEVT_COMMAND_ENTER, idLogMessage);
+    //FIXME Not safe
     logEvent.SetString(msg);
     logEvent.SetInt(lv);
     m_LogHandler->AddPendingEvent(logEvent);

@@ -1,34 +1,51 @@
 #ifndef TOOLTIPEVALUATOR_H_
 #define TOOLTIPEVALUATOR_H_
 #include <clang/Lex/Lexer.h>
-class ToolTipEvaluator : public boost::static_visitor<std::string>
+#include "astnodeutil.h"
+#include "stringio.h"
+class ToolTipEvaluator : public boost::static_visitor<wxString>
 {
 public:
     ToolTipEvaluator(ASTUnit* tu):
         m_Tu(tu)
     {}
-    std::string operator()(Decl* decl)
+    wxString operator()(const Decl* decl)
     {
-      std:: string message = Lexer::getSourceText(CharSourceRange::getCharRange(decl->getSourceRange()),
-                                                  m_Tu->getSourceManager(), m_Tu->getASTContext().getLangOpts());
-      return message;
-//    std::string message = named->getQualifiedNameAsString(PrintingPolicy(tu->getASTContext().getLangOpts()));
+        RawwxStringOstream out;
+        if (const NamedDecl* named = dyn_cast_or_null<NamedDecl>(decl))
+        {
+            named->printQualifiedName(out, PrintingPolicy(m_Tu->getASTContext().getLangOpts()));
+
+            for (auto it = decl->redecls_begin(), end = decl->redecls_end(); it != end; ++it)
+            {
+              //  const RawComment* raw = m_Tu->getASTContext().getRawCommentForAnyRedecl(decl);
+                const RawComment* raw = m_Tu->getASTContext().getRawCommentForDeclNoCache(*it);
+                if (raw)
+                {
+                    out << "\n" << raw->getRawText(m_Tu->getSourceManager());
+                }
+            }
+         }
+        return out.str();
     }
-    std::string operator()(Stmt* stmt)
+    wxString operator()(const Stmt* stmt)
     {
-        return "";
+        const Decl* decl = ASTNode::GetDeclarationFromStatement(stmt);
+        return operator()(decl);
     }
-    std::string operator()(const boost::blank&)
+    wxString operator()(const boost::blank&)
     {
-        return "";
+        return _T("");
     }
-    std::string operator()(TypeLoc& tloc)
+    wxString operator()(const TypeLoc& tloc)
     {
-        return "";
+        const Decl* decl = ASTNode::GetDeclarationFromTypeLoc(tloc);
+        return operator()(decl);
     }
-    std::string operator()(const RefNode& refNode)
+    wxString operator()(const RefNode& refNode)
     {
-        return "";
+        const Decl* decl = refNode.GetReferencedDeclaration();
+        return operator()(decl);
     }
 
 private:

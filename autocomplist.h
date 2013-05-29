@@ -3,13 +3,15 @@
 
 #include <wx/listctrl.h>
 #include <vector>
-#define MAX_HEIGHT 250
-#define MAX_WIDTH 400
+constexpr int MAX_HEIGHT = 250;
+constexpr int MAX_WIDTH  = 400;
+constexpr int ROW_COUNT = 15;
+
 class AutoCompList :public wxListView
 {
 public:
 	AutoCompList(wxWindow* parent, wxWindowID id = wxID_ANY,
-		         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(MAX_WIDTH-5,MAX_HEIGHT-5),
+		         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 				 long style = wxLC_VIRTUAL|wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_NO_HEADER);
 	wxString OnGetItemText(long item, long column) const;
 	int OnGetItemImage(long item) const;
@@ -18,7 +20,7 @@ public:
 	void DoLayout();
 private:
 	std::vector<wxString> m_FilteredItems;
-#if !wxCHECK_VERSION(2, 9, 4)
+#if !wxCHECK_VERSION(2, 9, 5)
     wxSize GetTextExtent(const wxString& string);
 #endif
 };

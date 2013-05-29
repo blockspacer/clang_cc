@@ -4,10 +4,13 @@
 #include <clang/AST/DeclVisitor.h>
 #include <clang/AST/StmtVisitor.h>
 #include <clang/AST/TypeLocVisitor.h>
+#include <wx/menu.h>
 #include "ASTnodefinder.h"
+#include "astnodeutil.h"
+#include "clang_cc.h"
 
 using namespace clang;
-class ContextMenuBuilder : public DeclVisitor<ContextMenuBuilder>,
+class ContextMenuBuilder : public ConstDeclVisitor<ContextMenuBuilder>,
                            public StmtVisitor<ContextMenuBuilder>,
                            public TypeLocVisitor<ContextMenuBuilder>,
                            public boost::static_visitor<>
@@ -16,33 +19,44 @@ public:
     ContextMenuBuilder(wxMenu* menu):
         m_Menu(menu)
     {}
-    void operator()(Decl* decl)
+    void operator()(const Decl* decl)
     {
+		if (!decl)
+			return;
         std::string log = "DeclKindName : ";
         log += decl->getDeclKindName();
         ClangCCLogger::Get()->Log(std2wx(log));
-        DeclVisitor::Visit(decl);
+        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+        if(const Decl* definition = ASTNode::GetDefinition(decl))
+            if (definition != decl)
+                 m_Menu->Append(idEditorGotoDeclaration, _T("Goto Definition"));
+
     }
-    void operator()(Stmt* stmt)
+    void operator()(const Stmt* stmt)
     {
         std::string log = "StatementClassName : ";
         log += stmt->getStmtClassName();
         ClangCCLogger::Get()->Log(std2wx(log));
-        StmtVisitor::Visit(stmt);
+        if (ASTNode::GetDeclarationFromStatement(stmt))
+            m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+
     }
     void operator()(const boost::blank&)
     {
         std::string log = "Empty Ast Node : ";
         ClangCCLogger::Get()->Log(std2wx(log));
     }
-    void operator()(TypeLoc& tloc)
+    void operator()(const TypeLoc& tloc)
     {
+        std::string className = "TypeClass name of typeloc : ";
+        className = className + tloc.getTypePtr()->getTypeClassName();
         std::string log = "TypeLoc : ";
         SplitQualType T_split = tloc.getType().split();
         log+= QualType::getAsString(T_split);
-
         ClangCCLogger::Get()->Log(std2wx(log));
-        TypeLocVisitor::Visit(tloc);
+        ClangCCLogger::Get()->Log(std2wx(className));
+
+        operator()(ASTNode::GetDeclarationFromTypeLoc(tloc));
     }
     void operator()(const RefNode& refNode)
     {
@@ -63,11 +77,11 @@ public:
         if (decl->isThisDeclarationADefinition() &&
             decl->getPreviousDecl())
         {
-            m_Menu->Append(idBrowserGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idCodeLayoutViewGotoDeclaration, _T("Goto Declaration"));
         }
         if (decl->hasBody() && !decl->isThisDeclarationADefinition())
         {
-            m_Menu->Append(idBrowserGotoDefinition, _T("Goto Definition"));
+            m_Menu->Append(idCodeLayoutViewGotoDefinition, _T("Goto Definition"));
         }
     }
     void VisitTagDecl(TagDecl* decl)
@@ -75,11 +89,11 @@ public:
         if (decl->isThisDeclarationADefinition() &&
             decl->getPreviousDecl())
         {
-            m_Menu->Append(idBrowserGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idCodeLayoutViewGotoDeclaration, _T("Goto Declaration"));
         }
         if (decl->getDefinition() && !decl->isThisDeclarationADefinition())
         {
-            m_Menu->Append(idBrowserGotoDefinition, _T("Goto Definition"));
+            m_Menu->Append(idCodeLayoutViewGotoDefinition, _T("Goto Definition"));
         }
     }
     void VisitDeclRefExpr(DeclRefExpr* expr)
