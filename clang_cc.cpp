@@ -431,10 +431,17 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
             }
             return;
         }
-        ASTNodeFinder finder(tu);
-        NodeType node = finder.GetASTNode(wx2std(projFile->file.GetFullPath()), pos);
-        ToolTipEvaluator ttEval(tu);
-        wxString toolTip = boost::apply_visitor(ttEval, node);
+        wxString toolTip;
+        if (!m_TUManager.IsFileBeingParsed(projFile))
+        {
+            ASTNodeFinder finder(tu);
+            NodeType node = finder.GetASTNode(wx2std(projFile->file.GetFullPath()), pos);
+            ToolTipEvaluator ttEval(tu);
+            toolTip = boost::apply_visitor(ttEval, node);
+        }
+        else
+            toolTip = _T("The file is still being parsed.");
+
         if (!toolTip.empty())
         {
             control->CallTipCancel();

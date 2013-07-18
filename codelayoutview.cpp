@@ -140,9 +140,6 @@ void CodeLayoutView::SetActiveFile(wxString fileName, ASTUnit* tu,bool fileRepar
       cbAssert(!fileName.IsEmpty() && tu);
       if (fileName != m_ActiveFile || m_TU != tu || fileReparsed )
       {
-#ifdef CLANGCC_TIMING
-    wxStopWatch watch;
-#endif // CLANGCC_TIMING
           m_ActiveFile = fileName;
           m_TU = tu;
           m_TreeCtrl->Freeze();
@@ -151,13 +148,7 @@ void CodeLayoutView::SetActiveFile(wxString fileName, ASTUnit* tu,bool fileRepar
           CodeLayoutASTVisitor visitor(*this, tu->getASTContext(), entry);
           visitor.TraverseDecl(tu->getASTContext().getTranslationUnitDecl());
           m_TreeCtrl->Thaw();
-#ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("Treeview for %s constructed in %ldms"), fileName.c_str(), watch.Time()),Logger::info);
-#endif // CLANGCC_TIMING
-
       }
-
-
 }
 
 void CodeLayoutView::OnTreeItemDoubleClicked(wxTreeEvent& event)
