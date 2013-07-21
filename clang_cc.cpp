@@ -452,7 +452,6 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 void ClangCC::OnParseStart(ccEvent& event)
 {
   //TODO do something sensible
-  int i=5;
   event.Skip();
 }
 void ClangCC::OnParseEnd(ccEvent& event)

@@ -1,5 +1,5 @@
 #include "classtest.h"
-#include <iostream>
+
 /* rhis is supposed to be a comment*/
 
 #define HEIGHT 5
@@ -29,7 +29,7 @@ zurna = 5;
 }
 int lookatme(int ff)
 {
-
+    char* df = new char[100];
 }
 int lookatme(float zz)
 {

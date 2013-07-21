@@ -91,7 +91,7 @@ public:
 template<typename U>
 class Burrito<U,float>
 {
-   float convert(U t){return t;}
+   float convert(U t){ return t;}
 };
 
 }
