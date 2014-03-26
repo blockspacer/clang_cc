@@ -1,13 +1,12 @@
 #include "diagnosticprinter.h"
-#include <llvm/ADT/SmallString.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Lex/Lexer.h>
-#include <clang/Frontend/ASTUnit.h>
+
+#include "clangcommon.h"
 #include <editormanager.h>
 #include <cbeditor.h>
 #include <cbstyledtextctrl.h>
 #include <logmanager.h>
 #include "stringio.h"
+#include "clangcclogger.h"
 
 DiagnosticPrinter::DiagnosticPrinter(ASTUnit* tu):
     m_TU(tu)

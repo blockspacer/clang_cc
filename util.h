@@ -1,11 +1,10 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include "clangcommon.h"
 #include <string>
 #include <wx/string.h>
 #include "filefilters.h"
-#include <clang/AST/Decl.h>
-#include <clang/Sema/CodeCompleteConsumer.h>
 #include "cbproject.h"
 #include "projectfile.h"
 

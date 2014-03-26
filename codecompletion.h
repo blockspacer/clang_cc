@@ -2,12 +2,8 @@
 #define CODECOMPLETION_H_
 
 
-#include <clang/Basic/Diagnostic.h>
-#include <clang/Basic/FileManager.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Basic/LangOptions.h>
-#include <clang/Sema/CodeCompleteConsumer.h>
 
+#include "clangcommon.h"
 
 #include <functional>
 #include <boost/bind.hpp>

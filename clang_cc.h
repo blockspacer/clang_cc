@@ -18,7 +18,7 @@
 #endif
 
 #include <cbplugin.h> // for "class cbToolPlugin"
-
+#include "clangcommon.h"
 #include "translationunitmanager.h"
 #include <map>
 class CodeLayoutView;
@@ -45,7 +45,7 @@ public:
     virtual wxArrayString GetCallTips() { return wxArrayString(); }
     virtual int CodeComplete();
     virtual void ShowCallTip();
-    virtual bool IsProviderFor(cbEditor* ed);
+    virtual CCProviderStatus GetProviderStatusFor(cbEditor* ed) override;
     /// build menus in the main frame
     virtual void BuildMenu(wxMenuBar* menuBar);
     /// build context menu

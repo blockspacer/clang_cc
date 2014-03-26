@@ -1,6 +1,6 @@
 #include "clang_cc.h"
 #include <sdk.h> // Code::Blocks SDK
-#include <boost/thread.hpp>
+#include <thread>
 #include <configurationpanel.h>
 #include <logmanager.h>
 
@@ -9,9 +9,9 @@
 #include "memoryusage.h"
 #include <cbstyledtextctrl.h>
 #include <editor_hooks.h>
-#include <llvm/Support/MemoryBuffer.h>
+#include <cbauibook.h>
 
-#include <clang/Lex/Lexer.h>
+
 #include "codecompletion.h"
 #include "codecompletepopup.h"
 #include "optionsdlg.h"
@@ -240,10 +240,12 @@ void ClangCC::OnSaveAST(wxCommandEvent& event)
 
 }
 
-
-bool ClangCC::IsProviderFor(cbEditor* ed)
+ClangCC::CCProviderStatus ClangCC::GetProviderStatusFor(cbEditor* ed)
 {
-    return IsCFamily(ed->GetShortName());
+    if (IsCFamily(ed->GetShortName()))
+        return CCProviderStatus::ccpsActive;
+    else
+        return CCProviderStatus::ccpsInactive;
 }
 void ClangCC::OnCodeComplete(CodeBlocksEvent& event)
 {
@@ -295,7 +297,7 @@ int ClangCC::CodeComplete()
     //We clear in case CC generates no results.
     m_CCPopup->ClearItems();
     tu->CodeComplete(fileName,line,column,
-                     &remap,1, /*Remapped files*/
+                     ArrayRef<ASTUnit::RemappedFile>(remap), /*Remapped files*/
                      ccOpts.IncludeMacros, /*Include Macros*/
                      ccOpts.IncludeCodePatterns, /*include patterns*/
                      true, /*include brief comments*/
@@ -380,7 +382,7 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
                 ProjectFile* pairedFile = GetProjectFilePair(projFile);
                 if (pairedFile) projFile = pairedFile ;
             }
-            boost::thread(&TranslationUnitManager::ParseProjectFile,
+            std::thread(&TranslationUnitManager::ParseProjectFile,
                           &m_TUManager,projFile,true);
         }
         if (tu)
@@ -490,7 +492,7 @@ void ClangCC::OnReparseFile(wxCommandEvent& event)
     ProjectFile* projFile = editor->GetProjectFile();
     if (projFile && IsProviderFor(editor))
     {
-        boost::thread(&TranslationUnitManager::ReparseProjectFile,
+        std::thread(&TranslationUnitManager::ReparseProjectFile,
                     &m_TUManager,projFile);
     }
 }

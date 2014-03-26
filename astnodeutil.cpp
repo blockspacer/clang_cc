@@ -1,3 +1,4 @@
+
 #include <cbeditor.h>
 #include <editormanager.h>
 #include <cbstyledtextctrl.h>
@@ -5,6 +6,7 @@
 #include "stringio.h"
 #include "astnodeutil.h"
 #include "clangcclogger.h"
+
 
 namespace ASTNode
 {

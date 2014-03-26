@@ -4,13 +4,10 @@
 #include <map>
 #include <vector>
 #include <wx/string.h>
-#include <boost/thread.hpp>
-// interface is macroed somewhere in mingw
-// not exactly portable but works for gcc,MSVC and clang
-#pragma push_macro("interface")
-#undef interface
-#include <clang/Frontend/ASTUnit.h>
-#pragma pop_macro("interface")
+#include <thread>
+#include <mutex>
+
+#include "clangcommon.h"
 
 #include <manager.h>
 #include <logmanager.h>
@@ -69,8 +66,8 @@ private:
     std::map<cbProject*,ParserMapType> m_ProjectTranslationUnits;
     std::vector<ProjectFile*> m_FilesBeingParsed;
     ClangCC& m_CC;
-    boost::mutex m_ProjectsMapMutex;
-    boost::mutex m_FilesBeingParsedMutex;
+    std::mutex m_ProjectsMapMutex;
+    std::mutex m_FilesBeingParsedMutex;
 };
 
 #endif // TRANSLATIONUNITMANAGER_H_

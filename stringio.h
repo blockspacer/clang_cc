@@ -2,7 +2,8 @@
 #define STRINGIO_H_
 
 #include <wx/string.h>
-#include <llvm/Support/raw_ostream.h>
+#include "clangcommon.h"
+
 
 /// Utility function for converting std::string to wxString
 inline wxString std2wx(const std::string& str)

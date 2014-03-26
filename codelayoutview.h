@@ -5,13 +5,8 @@
 #include <wx/treectrl.h>
 #include <wx/sizer.h>
 #include <wx/panel.h>
+#include "clangcommon.h"
 
-#include <clang/AST/Decl.h>
-#include <clang/Frontend/CompilerInstance.h>
-#pragma push_macro("interface")
-#undef interface
-#include <clang/Frontend/ASTUnit.h>
-#pragma pop_macro("interface")
 
 //Context menu event ids.
 extern const int idCodeLayoutViewGoto;

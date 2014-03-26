@@ -4,7 +4,8 @@
 #include <logmanager.h>
 #include <wx/textctrl.h>
 #include <loggers.h>
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
 
 extern int idLogMessage;
 
@@ -24,7 +25,7 @@ private:
 private:
     static ClangCCLogger* s_Inst;
     wxEvtHandler* m_LogHandler;
-    boost::mutex m_LoggerMutex;
+    std::mutex m_LoggerMutex;
 
 };
 

@@ -47,7 +47,7 @@ bool TranslationUnitManager::AddASTUnitForProjectFile(ProjectFile* file, ASTUnit
 
     if (proj)
     {
-        boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+        std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
         m_ProjectTranslationUnits[proj].insert(std::make_pair(file->file.GetFullPath(),
                                                std::shared_ptr<ASTUnit>(tu)));
         return true;
@@ -60,7 +60,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     cbAssert (file && file->file.FileExists() && "File not exists");
 
     {   //if the file is already being parsed return immediately.
-        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
         auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
         if (it != m_FilesBeingParsed.end())
             return nullptr;
@@ -183,7 +183,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     }
 
     {   //File is free again
-        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
         m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
     }
     //Parsing ended event
@@ -200,7 +200,7 @@ ASTUnit* TranslationUnitManager::GetASTUnitForProjectFile(ProjectFile* file)
     cbProject* proj = file->GetParentProject();
     wxString fileName = file->file.GetFullPath();
     bool isHeader = IsHeaderFile(fileName);
-    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
     auto it = m_ProjectTranslationUnits.find(proj);
     if (it != m_ProjectTranslationUnits.end())
     {
@@ -226,7 +226,7 @@ ASTUnit* TranslationUnitManager::GetASTUnitForProjectFile(ProjectFile* file)
 ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 {
     {   //if the file is already being parsed return immediately.
-        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
         auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
         if (it != m_FilesBeingParsed.end())
             return nullptr;
@@ -244,6 +244,8 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 
     cbStyledTextCtrl* control = Manager::Get()->GetEditorManager()->GetBuiltinEditor(fileName)->GetControl();
     SmallVector<ASTUnit::RemappedFile,1> remappedFiles;
+
+
     if (control->GetModify())
     {
         unsigned length = control->GetLength();
@@ -257,7 +259,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
     if (!tu)
         tu = ParseProjectFile(file);
 
-    if (!tu || tu->Reparse(remappedFiles.data(),remappedFiles.size()))
+    if (!tu || tu->Reparse(remappedFiles))
          ClangCCLogger::Get()->Log(_("\t Reparsing Failed : ")+ file->file.GetFullName());
 
 #ifdef CLANGCC_TIMING
@@ -265,7 +267,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 #endif // CLANGCC_TIMING
 
     {   //File is free again
-        boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
         m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
     }
 
@@ -277,7 +279,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 
 bool TranslationUnitManager::IsFileBeingParsed(ProjectFile* file)
 {
-    boost::lock_guard<boost::mutex> lock(m_FilesBeingParsedMutex);
+    std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
     auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
     if (it != m_FilesBeingParsed.end())
         return true;
@@ -314,13 +316,13 @@ std::vector<ASTMemoryUsage> TranslationUnitManager::GetMemoryUsageForProjectFile
 
 void TranslationUnitManager::Clear()
 {
-    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
     m_ProjectTranslationUnits.clear();
 }
 
 void TranslationUnitManager::RemoveFile(cbProject* project,const wxString& fileName)
 {
-    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
     //Not many projects so no worries
     for (auto & it : m_ProjectTranslationUnits)
     {
@@ -331,6 +333,6 @@ void TranslationUnitManager::RemoveFile(cbProject* project,const wxString& fileN
 
 void TranslationUnitManager::RemoveProject(cbProject* project)
 {
-    boost::lock_guard<boost::mutex> lock(m_ProjectsMapMutex);
+    std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
     m_ProjectTranslationUnits.erase(project);
 }

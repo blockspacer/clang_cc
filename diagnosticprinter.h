@@ -1,11 +1,10 @@
 #ifndef DIAGNOSTICPRINTER_H_
 #define DIAGNOSTICPRINTER_H_
 
-#include <clang/Basic/Diagnostic.h>
 #include <string>
 #include <set>
 
-#include "clangcclogger.h"
+
 #include "util.h"
 namespace clang
 {

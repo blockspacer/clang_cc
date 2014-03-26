@@ -29,7 +29,7 @@
 				<Environment>
 					<Variable name="WX_CFG" value="" />
 					<Variable name="WX_SUFFIX" value="u" />
-					<Variable name="WX_VERSION" value="28" />
+					<Variable name="WX_VERSION" value="31" />
 				</Environment>
 			</Target>
 			<Target title="release">
@@ -55,7 +55,7 @@
 				<Environment>
 					<Variable name="WX_CFG" value="" />
 					<Variable name="WX_SUFFIX" value="u" />
-					<Variable name="WX_VERSION" value="28" />
+					<Variable name="WX_VERSION" value="31" />
 				</Environment>
 			</Target>
 		</Build>
@@ -70,8 +70,6 @@
 			<Add option="-DHAVE_W32API_H" />
 			<Add option="-D__WXMSW__" />
 			<Add option="-DWXUSINGDLL" />
-			<Add option="-DCB_PRECOMP" />
-			<Add option="-DWX_PRECOMP" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-D__STDC_CONSTANT_MACROS" />
 			<Add option="-D__STDC_LIMIT_MACROS" />
@@ -80,18 +78,17 @@
 			<Add option="-DBOOST_RANGE_ENABLE_CONCEPT_ASSERT=0" />
 			<Add directory="$(#cb)/include" />
 			<Add directory="$(#cb)/sdk/wxscintilla/include" />
-			<Add directory="$(#wx.include)" />
-			<Add directory="$(#wx.lib)/gcc_dll$(WX_CFG)/msw$(WX_SUFFIX)" />
+			<Add directory="$(#wx30.include)" />
+			<Add directory="$(#wx30.lib)/gcc_dll$(WX_CFG)/msw$(WX_SUFFIX)" />
 			<Add directory="$(#boost.include)" />
 			<Add directory="wxjson" />
 		</Compiler>
 		<Linker>
 			<Add library="codeblocks" />
 			<Add library="wxmsw$(WX_VERSION)$(WX_SUFFIX)" />
-			<Add library="boost_thread" />
 			<Add library="boost_system" />
 			<Add directory="$(#cb)/devel" />
-			<Add directory="$(#wx.lib)/gcc_dll$(WX_CFG)" />
+			<Add directory="$(#wx30.lib)/gcc_dll$(WX_CFG)" />
 		</Linker>
 		<Unit filename="../mycpp_vc - Copy/mycpp_vc/testdeclreference.cpp">
 			<Option compile="0" />
@@ -125,6 +122,9 @@
 		<Unit filename="clang_cc.h" />
 		<Unit filename="clangcclogger.cpp" />
 		<Unit filename="clangcclogger.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="clangcommon.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="codecompletepopup.cpp" />

@@ -2,16 +2,8 @@
 #define ASTNODEFINDER_H_
 #include <iostream>
 #include <boost/variant.hpp>
-#include <clang/Lex/Lexer.h>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/RecursiveASTVisitor.h>
-#pragma push_macro("interface")
-#undef interface
-#include <clang/Frontend/ASTUnit.h>
-#pragma pop_macro("interface")
-#include <clang/AST/Attr.h>
-#include <clang/AST/Comment.h>
-#include <clang/Basic/SourceManager.h>
+#include "clangcommon.h"
+
 
 using namespace clang;
 enum LocationCompare

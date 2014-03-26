@@ -181,7 +181,7 @@ public:
     void VisitFunctionDecl(const FunctionDecl* decl)
     {
         // Return value and name
-        m_Out << decl->getResultType().getAsString(m_Policy) << ' ' << decl->getNameAsString();
+        m_Out << decl->getReturnType().getAsString(m_Policy) << ' ' << decl->getNameAsString();
         // Template paramaters if this is a Function template
         if (FunctionTemplateDecl* declTemplate = decl->getDescribedFunctionTemplate())
         {
