@@ -26,11 +26,6 @@
 					<Add after="zip -j -0 clang_cc.zip resources/images/browser_images.png" />
 					<Add after="zip -j9 debug/clang_cc.cbplugin debug/clang_cc.dll clang_cc.zip" />
 				</ExtraCommands>
-				<Environment>
-					<Variable name="WX_CFG" value="" />
-					<Variable name="WX_SUFFIX" value="u" />
-					<Variable name="WX_VERSION" value="31" />
-				</Environment>
 			</Target>
 			<Target title="release">
 				<Option output="release/clang_cc" prefix_auto="1" extension_auto="1" />
@@ -52,12 +47,12 @@
 					<Add after="zip -j -0 clang_cc.zip resources/images/browser_images.png" />
 					<Add after="zip -j9 release/clang_cc.cbplugin release/clang_cc.dll clang_cc.zip" />
 				</ExtraCommands>
-				<Environment>
-					<Variable name="WX_CFG" value="" />
-					<Variable name="WX_SUFFIX" value="u" />
-					<Variable name="WX_VERSION" value="31" />
-				</Environment>
 			</Target>
+			<Environment>
+				<Variable name="WX_CFG" value="" />
+				<Variable name="WX_SUFFIX" value="u" />
+				<Variable name="WX_VERSION" value="30" />
+			</Environment>
 		</Build>
 		<Compiler>
 			<Add option="-pipe" />
