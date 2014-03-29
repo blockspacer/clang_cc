@@ -142,8 +142,10 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
 void CodeCompletePopupWindow::OnCompletionListSize(wxSizeEvent& event)
 {
     SetClientSize(event.GetSize());
+
     //Reposition the window
-    Position(m_ScreenPoint, wxSize(0, m_Scintilla->TextHeight(m_Scintilla->GetCurrentLine())));
+    if (m_Scintilla)
+        Position(m_ScreenPoint, wxSize(0, m_Scintilla->TextHeight(m_Scintilla->GetCurrentLine())));
 	event.Skip();
 }
 void CodeCompletePopupWindow::SetEditor(cbEditor* editor)

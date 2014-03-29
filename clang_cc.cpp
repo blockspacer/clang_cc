@@ -372,7 +372,7 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
     if (!editor)
         return;
     ProjectFile* projFile = editor->GetProjectFile();
-    if (projFile && IsProviderFor(editor))
+    if (projFile && GetProviderStatusFor(editor) == ccpsActive)
     {
         ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
         if (!tu)

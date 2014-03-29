@@ -47,12 +47,12 @@ public:
     virtual void ShowCallTip();
 
     virtual CCProviderStatus GetProviderStatusFor(cbEditor* ed) override;
-    virtual std::vector<CCToken> GetAutocompList(bool isAuto, cbEditor* ed, int& tknStart, int& tknEnd) override;
-    virtual std::vector<CCCallTip> GetCallTips(int pos, int style, cbEditor* ed, int& argsPos) override;
-    virtual wxString GetDocumentation(const CCToken& token) override;
-    virtual std::vector<CCToken> GetTokenAt(int pos, cbEditor* ed, bool& allowCallTip) override;
-    virtual wxString OnDocumentationLink(wxHtmlLinkEvent& event, bool& dismissPopup) override;
-    virtual void DoAutocomplete(const CCToken& token, cbEditor* ed) override;
+    virtual  std::vector<CCToken> GetAutocompList(bool isAuto, cbEditor* ed, int& tknStart, int& tknEnd) override {return std::vector<CCToken>{};}
+    virtual std::vector<CCCallTip> GetCallTips(int pos, int style, cbEditor* ed, int& argsPos) override { return std::vector<CCCallTip>{};}
+    virtual wxString GetDocumentation(const CCToken& token) override {return wxString{};}
+    virtual std::vector<CCToken> GetTokenAt(int pos, cbEditor* ed, bool& allowCallTip) override {return std::vector<CCToken>{};}
+    virtual wxString OnDocumentationLink(wxHtmlLinkEvent& event, bool& dismissPopup) override { return wxString{};}
+    virtual void DoAutocomplete(const CCToken& token, cbEditor* ed) override {};
 
     /// build menus in the main frame
     virtual void BuildMenu(wxMenuBar* menuBar);
