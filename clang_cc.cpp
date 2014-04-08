@@ -61,7 +61,6 @@ END_EVENT_TABLE()
 
 using namespace clang;
 // constructor
-
 ClangCC::ClangCC():
     m_Mgr(Manager::Get()),
     m_EditorActivatedTimer(this, idEditorActivatedTimer),
@@ -75,7 +74,6 @@ ClangCC::ClangCC():
     {
         NotifyMissingFile(_T("clang_cc.zip"));
     }
-
 }
 
 // destructor
@@ -382,8 +380,10 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
                 ProjectFile* pairedFile = GetProjectFilePair(projFile);
                 if (pairedFile) projFile = pairedFile ;
             }
-            std::thread(&TranslationUnitManager::ParseProjectFile,
+            std::thread t(&TranslationUnitManager::ParseProjectFile,
                           &m_TUManager,projFile,true);
+            t.detach();
+
         }
         if (tu)
         {
@@ -493,7 +493,7 @@ void ClangCC::OnReparseFile(wxCommandEvent& event)
     if (projFile && IsProviderFor(editor))
     {
         std::thread(&TranslationUnitManager::ReparseProjectFile,
-                    &m_TUManager,projFile);
+                    &m_TUManager,projFile).detach();
     }
 }
 void ClangCC::OnLogMessage(wxCommandEvent& event)

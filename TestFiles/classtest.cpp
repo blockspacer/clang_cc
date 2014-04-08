@@ -51,7 +51,12 @@ void Deneme::ConstFunction() const {}
 void Deneme::VolatileFunction() volatile {}
 void Deneme::ConstVolatileFunction() const volatile{}
 }
-void bohu::Deneme::functionWithAVeryLongNameToTestListWindowWidth(const float& withLongVariableName){}
+void bohu::Deneme::functionWithAVeryLongNameToTestListWindowWidth(const float& withLongVariableName){
+    this->VolatileFunction();
+    this->ConstFunction();
+    this->sil5();
+    RED
+}
 
 int global_func(char c)
 {

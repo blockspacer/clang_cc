@@ -4,7 +4,7 @@
 #include <logmanager.h>
 #include <wx/textctrl.h>
 #include <loggers.h>
-#include <boost/thread.hpp>
+
 
 class DiagnosticListView : public ListCtrlLogger
 {
