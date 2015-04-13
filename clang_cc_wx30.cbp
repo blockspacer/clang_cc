@@ -55,12 +55,12 @@
 			</Environment>
 		</Build>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-pipe" />
 			<Add option="-mthreads" />
 			<Add option="-fmessage-length=0" />
 			<Add option="-fexceptions" />
 			<Add option="-Winvalid-pch" />
+			<Add option="-std=gnu++11" />
 			<Add option="-DBUILDING_PLUGIN" />
 			<Add option="-DHAVE_W32API_H" />
 			<Add option="-D__WXMSW__" />
@@ -97,11 +97,15 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="TestFiles/classtest.cpp">
+			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
 		<Unit filename="TestFiles/classtest.h" />
 		<Unit filename="TestFiles/headerfile.h" />
-		<Unit filename="TestFiles/sil.cpp" />
+		<Unit filename="TestFiles/sil.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="TestFiles/template_test.cpp">
 			<Option compile="0" />
 			<Option link="0" />

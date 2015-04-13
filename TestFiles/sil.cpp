@@ -44,4 +44,6 @@ int zoo()
     templ<int, char> coof;
     coof.foo(65);
 
+
+
 }

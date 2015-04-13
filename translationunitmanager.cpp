@@ -162,7 +162,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     invocation->getFrontendOpts().SkipFunctionBodies = Options::Get().ShouldSkipFunctionBodies();
 
 
-    ASTUnit* ast = ASTUnit::LoadFromCompilerInvocation(invocation,diags,
+    auto ast = ASTUnit::LoadFromCompilerInvocation(invocation,diags,
                                                        true, /* OnlyLocalDecls */
                                                        true, /*CaptureDiagnostics*/
                                                        true, /*PrecompilePreamble*/
@@ -170,7 +170,8 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                                        true,/*CacheCodeCompilationResults*/
                                                        true,/* Include Brief Comment*/
                                                        true  /* User Files are volatile*/
-                                                       );
+                                                       ).release();
+
 #ifdef CLANGCC_TIMING
     ClangCCLogger::Get()->Log(wxString::Format(_("Parsing %s completed in %ldms"), file->file.GetFullName().c_str(), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING

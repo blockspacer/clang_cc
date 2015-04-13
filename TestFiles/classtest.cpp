@@ -11,7 +11,7 @@ int globalvar=0 ;
 int more = 0;
 void fulbar()
 {
-globalvar = 67;
+globalvaxxr = 67;
 int zurna = globalvar * more;
 zurna += globalvar;
 
@@ -27,7 +27,7 @@ int zurna = 0;
 zurna = 5;
 
 }
-int lookatme(int ff)
+intx lookatme(int ff)
 {
     char* df = new char[100];
 }
@@ -54,10 +54,7 @@ void Deneme::ConstVolatileFunction() const volatile{}
 void bohu::Deneme::functionWithAVeryLongNameToTestListWindowWidth(const float& withLongVariableName){
     this->VolatileFunction();
     this->ConstFunction();
-    this->sil5();
-    RED
 }
-
 int global_func(char c)
 {
 	return c+1;
