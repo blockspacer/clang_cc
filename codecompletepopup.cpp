@@ -46,10 +46,9 @@ CodeCompletePopupWindow::CodeCompletePopupWindow(wxWindow* parent):
 
 	m_CompleteListCtrl = new AutoCompList(this,idAutoCompList);
 
-	m_CompleteListCtrl->Connect(wxEVT_ENTER_WINDOW,wxMouseEventHandler(CodeCompletePopupWindow::OnCompletionListMouseOver),
-		nullptr,this);
-    m_CompleteListCtrl->Connect(wxEVT_SIZE,wxSizeEventHandler(CodeCompletePopupWindow::OnCompletionListSize),
-        nullptr,this);
+
+    m_CompleteListCtrl->Bind(wxEVT_ENTER_WINDOW,CodeCompletePopupWindow::OnCompletionListMouseOver,this);
+    m_CompleteListCtrl->Bind(wxEVT_SIZE,CodeCompletePopupWindow::OnCompletionListSize,this);
 
 	wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
 	topSizer->Add( m_CompleteListCtrl, 1, wxEXPAND );
