@@ -18,10 +18,6 @@
 					<Add option="-DcbDEBUG" />
 					<Add option="-DCLANGCC_DEBUG_LOGGING" />
 				</Compiler>
-				<Linker>
-					<Add option="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangEdit -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangARCMigrate -lclangAST -lclangLex -lclangBasic  `llvm-config  --libs` `llvm-config --ldflags`" />
-					<Add option="-Wl,--no-undefined" />
-				</Linker>
 				<ExtraCommands>
 					<Add after="zip -j9 clang_cc.zip manifest.xml resources/*.xrc" />
 					<Add after="zip -j -0 clang_cc.zip resources/images/browser_images.png" />
@@ -36,6 +32,7 @@
 			<Add option="-fexceptions" />
 			<Add option="-Winvalid-pch" />
 			<Add option="`wx-config --cxxflags`" />
+			<Add option="-I`llvm-config-3.5 --includedir`" />
 			<Add option="-fPIC" />
 			<Add option="-Ulinux" />
 			<Add option="-Uunix" />
@@ -45,16 +42,15 @@
 			<Add option="-D__STDC_LIMIT_MACROS" />
 			<Add option="-DCLANGCC_TIMING" />
 			<Add option="-DBOOST_RANGE_ENABLE_CONCEPT_ASSERT=0" />
-			<Add directory="$(#cb)/include" />
-			<Add directory="$(#cb)/sdk/wxscintilla/include" />
-			<Add directory="/usr/include/i386-linux-gnu/c++/4.7" />
+			<Add directory="$(#cb)/include/codeblocks" />
+			<Add directory="$(#cb)/include/codeblocks/wxscintilla/include" />
 		</Compiler>
 		<Linker>
-			<Add option="`wx-config --libs`" />
-			<Add library="libcodeblocks.a" />
+			<Add option="`wx-config --libs` `llvm-config  --libs` `llvm-config --ldflags`" />
+			<Add library="codeblocks" />
 			<Add library="boost_thread" />
 			<Add library="boost_system" />
-			<Add directory="$(#cb)/devel" />
+			<Add directory="$(#cb)/lib" />
 		</Linker>
 		<Unit filename="../mycpp_vc - Copy/mycpp_vc/testdeclreference.cpp">
 			<Option compile="0" />

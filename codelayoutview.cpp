@@ -59,15 +59,15 @@ CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
 	m_TreeCtrl->AddRoot(_T("root"));
 	//Setup events
 
-	m_TUManager.Bind(ccEVT_PARSE_END,CodeLayoutView::OnParseEnd,this);
-	m_TUManager.Bind(ccEVT_REPARSE_END,CodeLayoutView::OnParseEnd,this);
+	m_TUManager.Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+	m_TUManager.Bind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 
 }
 
 CodeLayoutView::~CodeLayoutView()
 {
-    m_TUManager.Unbind(ccEVT_PARSE_END,CodeLayoutView::OnParseEnd,this);
-    m_TUManager.Unbind(ccEVT_REPARSE_END,CodeLayoutView::OnParseEnd,this);
+    m_TUManager.Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+    m_TUManager.Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 	//m_TUManager.Disconnect(ccEVT_PARSE_END, ccEventHandler(CodeLayoutView::OnParseEnd), nullptr, this);
    // m_TUManager.Disconnect(ccEVT_REPARSE_END, ccEventHandler(CodeLayoutView::OnParseEnd), nullptr, this);
 }

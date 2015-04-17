@@ -114,10 +114,10 @@ void ClangCC::OnAttach()
 
     m_Mgr->RegisterEventSink(cbEVT_COMPLETE_CODE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnCodeComplete));
 
-    m_TUManager.Bind(ccEVT_PARSE_START, ClangCC::OnParseStart,this);
-    m_TUManager.Bind(ccEVT_REPARSE_START, ClangCC::OnParseStart,this);
-    m_TUManager.Bind(ccEVT_PARSE_END, ClangCC::OnParseEnd,this);
-    m_TUManager.Bind(ccEVT_REPARSE_END, ClangCC::OnParseEnd,this);
+    m_TUManager.Bind(ccEVT_PARSE_START, &ClangCC::OnParseStart,this);
+    m_TUManager.Bind(ccEVT_REPARSE_START, &ClangCC::OnParseStart,this);
+    m_TUManager.Bind(ccEVT_PARSE_END, &ClangCC::OnParseEnd,this);
+    m_TUManager.Bind(ccEVT_REPARSE_END, &ClangCC::OnParseEnd,this);
 }
 
 void ClangCC::OnRelease(bool appShutDown)
@@ -139,10 +139,10 @@ void ClangCC::OnRelease(bool appShutDown)
         Manager::Get()->ProcessEvent(evt);
         m_TUManager.Clear();
 
-        m_TUManager.Unbind(ccEVT_PARSE_START, ClangCC::OnParseStart,this);
-        m_TUManager.Unbind(ccEVT_REPARSE_START, ClangCC::OnParseStart,this);
-        m_TUManager.Unbind(ccEVT_PARSE_END, ClangCC::OnParseEnd,this);
-        m_TUManager.Unbind(ccEVT_REPARSE_END, ClangCC::OnParseEnd,this);
+        m_TUManager.Unbind(ccEVT_PARSE_START, &ClangCC::OnParseStart,this);
+        m_TUManager.Unbind(ccEVT_REPARSE_START, &ClangCC::OnParseStart,this);
+        m_TUManager.Unbind(ccEVT_PARSE_END, &ClangCC::OnParseEnd,this);
+        m_TUManager.Unbind(ccEVT_REPARSE_END, &ClangCC::OnParseEnd,this);
     }
 }
 
