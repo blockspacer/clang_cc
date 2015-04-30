@@ -104,7 +104,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
         //FIXME needs macro replacement? Or we get them already expanded.
         if (macro.StartsWith(_T("-D"), &definition))
         {
-            ClangCCLogger::Get()->Log(_("\t Preprocessor Definitions  : ") + definition);
+            LoggerAccess::Get()->Log(_("\t Preprocessor Definitions  : ") + definition);
             invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
         }
     }
@@ -118,7 +118,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
         invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
                                                   clang::frontend::Angled,
                                                   false,false);
-        ClangCCLogger::Get()->Log(_("\t added Project Include Path : ")+path.GetPath());
+        LoggerAccess::Get()->Log(_("\t added Project Include Path : ")+path.GetPath());
 
     }
     //Add target specific definitions and include paths.
@@ -138,7 +138,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                 //FIXME needs macro replacement?
                 if (macro.StartsWith(_T("-D"), &definition))
                 {
-                    ClangCCLogger::Get()->Log(_("\t Target Preprocessor Definitions  : ") + definition);
+                    LoggerAccess::Get()->Log(_("\t Target Preprocessor Definitions  : ") + definition);
                     invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
                 }
             }
@@ -150,7 +150,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                 invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
                                                           clang::frontend::Angled,
                                                           false,false);
-                ClangCCLogger::Get()->Log(_("\t Added Target Include Path : ")+path.GetPath());
+                LoggerAccess::Get()->Log(_("\t Added Target Include Path : ")+path.GetPath());
             }
         }
     }
@@ -173,10 +173,10 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                                        ).release();
 
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("Parsing %s completed in %ldms"), file->file.GetFullName().c_str(), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("Parsing %s completed in %ldms"), file->file.GetFullName().c_str(), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     if (!ast)
-      ClangCCLogger::Get()->Log(_("\t Cannot Create ASTUnit for ") + file->file.GetFullName());
+      LoggerAccess::Get()->Log(_("\t Cannot Create ASTUnit for ") + file->file.GetFullName());
     if (ast)
     {
         if (allowAdd)
@@ -261,10 +261,10 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
         tu = ParseProjectFile(file);
 
     if (!tu || tu->Reparse(remappedFiles))
-         ClangCCLogger::Get()->Log(_("\t Reparsing Failed : ")+ file->file.GetFullName());
+         LoggerAccess::Get()->Log(_("\t Reparsing Failed : ")+ file->file.GetFullName());
 
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("Reparsing completed in %ldms"), watch.Time()), Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("Reparsing completed in %ldms"), watch.Time()), Logger::info);
 #endif // CLANGCC_TIMING
 
     {   //File is free again

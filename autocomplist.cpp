@@ -36,7 +36,7 @@ void AutoCompList::SetItems(std::vector<wxString> items)
    m_FilteredItems = items;
 
    SetItemCount(m_FilteredItems.size());
-   ClangCCLogger::Get()->Log(wxString::Format(_("%d items for CodeCompleteList."),m_FilteredItems.size()));
+   LoggerAccess::Get()->Log(wxString::Format(_("%d items for CodeCompleteList."),m_FilteredItems.size()));
    DoLayout();
    if (!m_FilteredItems.empty())
    {

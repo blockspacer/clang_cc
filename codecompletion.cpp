@@ -23,7 +23,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
 //    std::stable_sort(Results, Results + NumResults); //Sort By name
-//    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by name executed in %ldms"), watch.Time()),Logger::info);
+//    LoggerAccess::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by name executed in %ldms"), watch.Time()),Logger::info);
     std::vector<CodeCompleteResultHolder> out;
     switch(m_SortType)
     {
@@ -33,7 +33,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
             break;
     }
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by Priority executed in %ldms"), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults Sort by Priority executed in %ldms"), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     std::vector<wxString> stringResults;
     CCListedResultTypes shownTypes = Options::Get().GetListedResultTypes();
@@ -78,7 +78,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
     }
     m_CcPopup->SetItems(std::move(out));
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults processed %d results in %ldms"), NumResults, watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("ProcessCodeCompleteResults processed %d results in %ldms"), NumResults, watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
 }
 
@@ -86,7 +86,7 @@ void EditorCodeCompleteConsumer::ProcessOverloadCandidates(Sema &S, unsigned Cur
                                                            OverloadCandidate *Candidates,
                                                            unsigned NumCandidates)
 {
-    ClangCCLogger::Get()->Log(_("Strange!! ProcessOverloadCandidates never gets called.See to it."));
+    LoggerAccess::Get()->Log(_("Strange!! ProcessOverloadCandidates never gets called.See to it."));
     std::ostringstream os;
     for (unsigned i=0 ; i < NumCandidates ; ++i)
     {

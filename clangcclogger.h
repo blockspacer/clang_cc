@@ -7,26 +7,35 @@
 #include <thread>
 #include <mutex>
 
-extern int idLogMessage;
-
 class ClangCCLogger : public TextCtrlLogger
 {
 public:
-    static ClangCCLogger* Get();
+
     //This one can be called from other threads
-    void Init(wxEvtHandler* parent);
+    ClangCCLogger(wxEvtHandler* parent);
     virtual void Log(const wxString& msg, Logger::level lv = info);
-private:
-    ClangCCLogger();
-    virtual ~ClangCCLogger();
-    ClangCCLogger(const ClangCCLogger&);
-    ClangCCLogger& operator = (const ClangCCLogger&);
+    ClangCCLogger(const ClangCCLogger&) = delete;
+    ClangCCLogger& operator = (const ClangCCLogger&) = delete;
 
 private:
-    static ClangCCLogger* s_Inst;
+
     wxEvtHandler* m_LogHandler;
     std::mutex m_LoggerMutex;
 
+};
+class LoggerAccess
+{
+public:
+   static void Init(ClangCCLogger* logger)
+   {
+      ptr = logger;
+   }
+   static ClangCCLogger* Get()
+   {
+       return ptr;
+   }
+private:
+    static ClangCCLogger * ptr;
 };
 
 #endif // CLANGCCLOGGER_H_

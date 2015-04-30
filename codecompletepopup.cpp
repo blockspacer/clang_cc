@@ -390,7 +390,7 @@ std::vector<wxString> CodeCompletePopupWindow::CreateListStrings(const RangeType
         out.push_back(std::move(itemText));
     }
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("CreateListStrings completed in %ldms"), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("CreateListStrings completed in %ldms"), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     return out;
 }

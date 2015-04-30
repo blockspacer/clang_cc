@@ -25,7 +25,7 @@ public:
 			return;
         std::string log = "DeclKindName : ";
         log += decl->getDeclKindName();
-        ClangCCLogger::Get()->Log(std2wx(log));
+        LoggerAccess::Get()->Log(std2wx(log));
         m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
         if(const Decl* definition = ASTNode::GetDefinition(decl))
             if (definition != decl)
@@ -36,7 +36,7 @@ public:
     {
         std::string log = "StatementClassName : ";
         log += stmt->getStmtClassName();
-        ClangCCLogger::Get()->Log(std2wx(log));
+        LoggerAccess::Get()->Log(std2wx(log));
         if (ASTNode::GetDeclarationFromStatement(stmt))
             m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
 
@@ -44,7 +44,7 @@ public:
     void operator()(const boost::blank&)
     {
         std::string log = "Empty Ast Node : ";
-        ClangCCLogger::Get()->Log(std2wx(log));
+        LoggerAccess::Get()->Log(std2wx(log));
     }
     void operator()(const TypeLoc& tloc)
     {
@@ -53,8 +53,8 @@ public:
         std::string log = "TypeLoc : ";
         SplitQualType T_split = tloc.getType().split();
         log+= QualType::getAsString(T_split);
-        ClangCCLogger::Get()->Log(std2wx(log));
-        ClangCCLogger::Get()->Log(std2wx(className));
+        LoggerAccess::Get()->Log(std2wx(log));
+        LoggerAccess::Get()->Log(std2wx(className));
 
         operator()(ASTNode::GetDeclarationFromTypeLoc(tloc));
     }
@@ -62,7 +62,7 @@ public:
     {
        std::string log = "RefNode : ";
        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
-       ClangCCLogger::Get()->Log(std2wx(log));
+       LoggerAccess::Get()->Log(std2wx(log));
     }
     void VisitStmt(Stmt* node) const
     {

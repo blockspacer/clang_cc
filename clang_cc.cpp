@@ -51,8 +51,6 @@ BEGIN_EVENT_TABLE(ClangCC, cbCodeCompletionPlugin)
     EVT_MENU(idReparseFile, ClangCC::OnReparseFile)
     EVT_MENU(idMemoryUsage, ClangCC::OnMemoryUsage)
     EVT_MENU(idSaveAST, ClangCC::OnSaveAST)
-    EVT_COMMAND(idLogMessage, wxEVT_COMMAND_ENTER, ClangCC::OnLogMessage)
-
     EVT_MENU (idEditorGotoDeclaration,  ClangCC::OnGotoItemDeclaration)
     EVT_MENU (idEditorGotoDefinition,  ClangCC::OnGotoItemDefinition)
 END_EVENT_TABLE()
@@ -87,10 +85,11 @@ void ClangCC::OnAttach()
     m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, _("Clang_cc"));
 
     //Setup logs.
-    ClangCCLogger::Get()->Init(this);
+
+    LoggerAccess::Init(new ClangCCLogger(this));
 
     LogManager* logMgr = m_Mgr->GetLogManager();
-    m_LoggerIndex = logMgr->SetLog(ClangCCLogger::Get());
+    m_LoggerIndex = logMgr->SetLog(LoggerAccess::Get());
     logMgr->Slot(m_LoggerIndex).title = _("Clang_CC Log");
 
     CodeBlocksLogEvent evt(cbEVT_ADD_LOG_WINDOW, m_LoggerIndex, logMgr->Slot(m_LoggerIndex).title, logMgr->Slot(m_LoggerIndex).icon);
@@ -271,7 +270,7 @@ int ClangCC::CodeComplete()
     int column = control->GetColumn(wordStartPos) + 1;
     wxString logstring;
     logstring << _("Code Complete at : ") <<editor->GetShortName() << _(":")<< line <<_(":")<<column;
-    ClangCCLogger::Get()->Log(logstring);
+    LoggerAccess::Get()->Log(logstring);
     int length = control->GetTextLength();
     llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName);
     control->SendMsg(SCI_GETTEXT, length+1, (wxUIntPtr)membuf->getBufferStart());
@@ -301,7 +300,7 @@ int ClangCC::CodeComplete()
                      *helper.m_FileMgr,helper.m_StoredDiags,helper.m_OwnedBuffers
                      );
 #ifdef CLANGCC_TIMING
-    ClangCCLogger::Get()->Log(wxString::Format(_("tu->CodeComplete executed in %ldms"), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format(_("tu->CodeComplete executed in %ldms"), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     /// Deactivates the current popup
     m_CCPopup->SetEditor(editor);
@@ -323,7 +322,7 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
     int evtype = sciEvent.GetEventType();
     if(evtype == wxEVT_SCI_CHARADDED)
     {
-        ClangCCLogger::Get()->Log(_T("wxEvt_SCI_CHARAdded "));
+        LoggerAccess::Get()->Log(_T("wxEvt_SCI_CHARAdded "));
         wxChar chr = sciEvent.GetKey();
 
         int currPos = control->GetCurrentPos();
@@ -387,7 +386,7 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
             m_View->SetActiveFile(editor->GetFilename(),tu);
         }
     }
-    ClangCCLogger::Get()->Log(_("Editor activated : ") + editor->GetFilename());
+    LoggerAccess::Get()->Log(_("Editor activated : ") + editor->GetFilename());
 }
 void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 {
@@ -493,12 +492,7 @@ void ClangCC::OnReparseFile(wxCommandEvent& event)
                     &m_TUManager,projFile).detach();
     }
 }
-void ClangCC::OnLogMessage(wxCommandEvent& event)
-{
-    wxString msg = event.GetString();
-    Logger::level lv = (Logger::level) event.GetInt();
-    ClangCCLogger::Get()->Append(msg, lv);
-}
+
 void ClangCC::OnGotoItemDeclaration(wxCommandEvent& event)
 {
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();

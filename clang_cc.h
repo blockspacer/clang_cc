@@ -82,8 +82,6 @@ public:
     void OnParseStart(ccEvent& event);
     /// Called after parsing ends.
     void OnParseEnd(ccEvent& event);
-    /// Handles log messages
-    void OnLogMessage(wxCommandEvent& event);
     /// Saves the ast to the file;
     void OnSaveAST(wxCommandEvent& event);
     // ContextMenu Handlers

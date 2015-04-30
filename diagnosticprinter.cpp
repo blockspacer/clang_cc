@@ -57,11 +57,11 @@ void DiagnosticPrinter::MarkOnEditors()
             default:
                 diagLevel = Logger::info;
         }
-        ClangCCLogger::Get()->Log(std2wx(diag.getMessage()), diagLevel);
+        LoggerAccess::Get()->Log(std2wx(diag.getMessage()), diagLevel);
         if (loc.isValid())
         {
             const SourceManager& srcMgr = loc.getManager();
-            ClangCCLogger::Get()->Log(std2wx(loc.printToString(srcMgr)), diagLevel);
+            LoggerAccess::Get()->Log(std2wx(loc.printToString(srcMgr)), diagLevel);
             std::string fileName = srcMgr.getFilename(loc);
 
             cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(std2wx(fileName));
