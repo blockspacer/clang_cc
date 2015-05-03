@@ -20,9 +20,6 @@ public:
 	void DoLayout();
 private:
 	std::vector<wxString> m_FilteredItems;
-#if !wxCHECK_VERSION(2, 9, 5)
-    wxSize GetTextExtent(const wxString& string);
-#endif
 };
 #endif // AUTOCOMPLIST_H_
 

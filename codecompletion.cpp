@@ -91,7 +91,7 @@ void EditorCodeCompleteConsumer::ProcessOverloadCandidates(Sema &S, unsigned Cur
     for (unsigned i=0 ; i < NumCandidates ; ++i)
     {
         CodeCompletionString *ccs
-            = Candidates[i].CreateSignatureString(CurrentArg, S, getAllocator(), m_TUInfo);
+            = Candidates[i].CreateSignatureString(CurrentArg, S, getAllocator(), m_TUInfo,true);
         os << ccs->getAsString() << "\n";
     }
 

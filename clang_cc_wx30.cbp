@@ -11,16 +11,13 @@
 				<Option object_output="debug/.objs" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option host_application="$(#cb)/output30_64-debug/codeblocks.exe" />
+				<Option host_application="$(#cb)/devel30_64/codeblocks.exe" />
 				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DcbDEBUG" />
 					<Add option="-DCLANGCC_DEBUG_LOGGING" />
 				</Compiler>
-				<Linker>
-					<Add option="-mthreads  -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangEdit -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangARCMigrate -lclangAST -lclangLex -lclangBasic  `llvm-config  --libs` `llvm-config --ldflags` `llvm-config --system-libs`" />
-				</Linker>
 				<ExtraCommands>
 					<Add after="zip -j9 clang_cc.zip manifest.xml resources/*.xrc" />
 					<Add after="zip -j -0 clang_cc.zip resources/images/browser_images.png" />
@@ -42,18 +39,17 @@
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
-				<Linker>
-					<Add option="-mthreads  -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangEdit -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangARCMigrate -lclangAST -lclangLex -lclangBasic `llvm-config  --libs`  `llvm-config --ldflags` `llvm-config --system-libs`" />
-				</Linker>
 				<ExtraCommands>
 					<Add after="zip -j9 clang_cc.zip manifest.xml resources/*.xrc" />
 					<Add after="zip -j -0 clang_cc.zip resources/images/browser_images.png" />
 					<Add after="zip -j9 release/clang_cc.cbplugin release/clang_cc.dll clang_cc.zip" />
 				</ExtraCommands>
+				<Environment>
+					<Variable name="WX_SUFFIX" value="u" />
+				</Environment>
 			</Target>
 			<Environment>
 				<Variable name="WX_CFG" value="" />
-				<Variable name="WX_SUFFIX" value="u" />
 				<Variable name="WX_VERSION" value="30" />
 			</Environment>
 		</Build>
@@ -79,10 +75,13 @@
 			<Add directory="$(#wx30_64.lib)/gcc_dll$(WX_CFG)/msw$(WX_SUFFIX)" />
 			<Add directory="$(#boost.include)" />
 			<Add directory="wxjson" />
+			<Add directory="$(#cb)/plugins/compilergcc" />
 		</Compiler>
 		<Linker>
+			<Add option="-Wl,-no-undefined -mthreads  -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangARCMigrate -lclangRewriteFrontend -lclangEdit -lclangAST -lclangLex -lclangBasic `llvm-config  --libs`  `llvm-config --ldflags` `llvm-config --system-libs`" />
 			<Add library="codeblocks" />
 			<Add library="wxmsw$(WX_VERSION)$(WX_SUFFIX)" />
+			<Add library="compiler" />
 			<Add directory="$(#cb)/devel30_64" />
 			<Add directory="$(#wx30_64.lib)/gcc_dll$(WX_CFG)" />
 			<Add directory="$(#boost.lib)" />

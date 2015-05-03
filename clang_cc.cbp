@@ -11,7 +11,7 @@
 				<Option object_output="debug/.objs" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option host_application="$(#cb)/devel/codeblocks.exe" />
+				<Option host_application="$(#cb)/devel30_64/codeblocks.exe" />
 				<Option run_host_application_in_terminal="1" />
 				<Compiler>
 					<Add option="-g" />

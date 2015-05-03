@@ -11,9 +11,10 @@ int globalvar=0 ;
 int more = 0;
 void fulbar()
 {
-globalvaxxr = 67;
+globalvar = 67;
 int zurna = globalvar * more;
 zurna += globalvar;
+
 
 }
 namespace bohu{
@@ -27,7 +28,7 @@ int zurna = 0;
 zurna = 5;
 
 }
-intx lookatme(int ff)
+int lookatme(int ff)
 {
     char* df = new char[100];
 }

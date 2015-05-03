@@ -250,7 +250,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
     if (control->GetModify())
     {
         unsigned length = control->GetLength();
-        llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,wx2std(fileName));
+        llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,wx2std(fileName)).release();
         control->SendMsg(SCI_GETTEXT, length+1, (wxUIntPtr)membuf->getBufferStart());
         ASTUnit::RemappedFile remap = std::make_pair(wx2std(fileName),membuf);
         remappedFiles.push_back(remap);

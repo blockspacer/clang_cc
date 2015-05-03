@@ -75,6 +75,7 @@ public:
     void OnEditorActivatedTimer(wxTimerEvent& event);
     void OnReparseTimer(wxTimerEvent& event);
     // Clang events.
+    void OnCompileCommands(wxCommandEvent& event);
     void OnReparseFile(wxCommandEvent& event);
     void OnCodeComplete(CodeBlocksEvent& event);
     void OnMemoryUsage(wxCommandEvent& event);

@@ -10,6 +10,11 @@
 #include <cbstyledtextctrl.h>
 #include <editor_hooks.h>
 #include <cbauibook.h>
+#include <compilercommandgenerator.h>
+#include <compilerfactory.h>
+#include <compilergcc.h>
+#include <directcommands.h>
+
 
 
 #include "codecompletion.h"
@@ -41,6 +46,7 @@ namespace
     int idEditorActivatedTimer      = wxNewId();
     int idReparseTimer              = wxNewId();
     int idSaveAST                   = wxNewId();
+    int idCompileCommands           = wxNewId();
 }
 
 #define EDITOR_ACTIVATED_DELAY    300
@@ -53,6 +59,7 @@ BEGIN_EVENT_TABLE(ClangCC, cbCodeCompletionPlugin)
     EVT_MENU(idSaveAST, ClangCC::OnSaveAST)
     EVT_MENU (idEditorGotoDeclaration,  ClangCC::OnGotoItemDeclaration)
     EVT_MENU (idEditorGotoDefinition,  ClangCC::OnGotoItemDefinition)
+    EVT_MENU (idCompileCommands, ClangCC::OnCompileCommands)
 END_EVENT_TABLE()
 
 
@@ -136,12 +143,13 @@ void ClangCC::OnRelease(bool appShutDown)
 
         CodeBlocksLogEvent evt(cbEVT_REMOVE_LOG_WINDOW, m_LoggerIndex);
         Manager::Get()->ProcessEvent(evt);
-        m_TUManager.Clear();
+
 
         m_TUManager.Unbind(ccEVT_PARSE_START, &ClangCC::OnParseStart,this);
         m_TUManager.Unbind(ccEVT_REPARSE_START, &ClangCC::OnParseStart,this);
         m_TUManager.Unbind(ccEVT_PARSE_END, &ClangCC::OnParseEnd,this);
         m_TUManager.Unbind(ccEVT_REPARSE_END, &ClangCC::OnParseEnd,this);
+        m_TUManager.Clear();
     }
 }
 
@@ -166,6 +174,7 @@ void ClangCC::BuildMenu(wxMenuBar* menuBar)
     clangCCMenu->Append(idReparseFile,_("Reparse File"));
     clangCCMenu->Append(idMemoryUsage,_("Show Memory Usage"));
     clangCCMenu->Append(idSaveAST, _("Save AST File"));
+    clangCCMenu->Append(idCompileCommands, _("CompileCommands"));
     menuBar->Insert(index + 1, clangCCMenu,_("&Clang_CC"));
 }
 void ClangCC::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
@@ -232,7 +241,29 @@ void ClangCC::OnSaveAST(wxCommandEvent& event)
     }
 
 
+
 }
+void ClangCC::OnCompileCommands(wxCommandEvent& event)
+{
+
+  CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( m_Mgr->GetPluginManager()->FindPluginByName(_T("Compiler")));
+
+   cbProject* proj = m_Mgr->GetProjectManager()->GetActiveProject();
+   auto count = proj->GetBuildTargetsCount();
+   for (int i = 0; i < count ; ++i)
+   {
+       ProjectBuildTarget* target = proj->GetBuildTarget(i);
+
+       DirectCommands dc(plugin, CompilerFactory::GetCompiler(target->GetCompilerID()), proj);
+       wxArrayString dafuq = dc.GetCompileCommands(target);
+       for (auto& z : dafuq)
+       {
+          LoggerAccess::Get()->Append(z);
+       }
+
+    }
+}
+
 
 ClangCC::CCProviderStatus ClangCC::GetProviderStatusFor(cbEditor* ed)
 {
@@ -272,7 +303,7 @@ int ClangCC::CodeComplete()
     logstring << _("Code Complete at : ") <<editor->GetShortName() << _(":")<< line <<_(":")<<column;
     LoggerAccess::Get()->Log(logstring);
     int length = control->GetTextLength();
-    llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName);
+    llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName).release();
     control->SendMsg(SCI_GETTEXT, length+1, (wxUIntPtr)membuf->getBufferStart());
 
     ASTUnit::RemappedFile remap = std::make_pair(fileName,membuf);

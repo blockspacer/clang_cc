@@ -36,7 +36,7 @@ void AutoCompList::SetItems(std::vector<wxString> items)
    m_FilteredItems = items;
 
    SetItemCount(m_FilteredItems.size());
-   LoggerAccess::Get()->Log(wxString::Format(_("%d items for CodeCompleteList."),m_FilteredItems.size()));
+   LoggerAccess::Get()->Log(wxString::Format(_("%u items for CodeCompleteList."),m_FilteredItems.size()));
    DoLayout();
    if (!m_FilteredItems.empty())
    {
@@ -77,12 +77,3 @@ void AutoCompList::DoLayout()
 	}
 	Refresh();
 }
-#if !wxCHECK_VERSION(2, 9, 5)
-wxSize AutoCompList::GetTextExtent(const wxString& string)
-{
-    wxCoord w,h;
-    wxWindow::GetTextExtent(string, &w, &h);
-    return wxSize(w, h);
-}
-
-#endif
