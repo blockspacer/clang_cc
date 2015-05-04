@@ -27,6 +27,10 @@
 #include "tooltipevaluator.h"
 #include "ccevents.h"
 
+#include "wx/jsonval.h"
+#include "wx/jsonwriter.h"
+#include <wx/wfstream.h>
+
 #define SCI_GETTEXT 2182
 
 
@@ -245,23 +249,48 @@ void ClangCC::OnSaveAST(wxCommandEvent& event)
 }
 void ClangCC::OnCompileCommands(wxCommandEvent& event)
 {
-
-  CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( m_Mgr->GetPluginManager()->FindPluginByName(_T("Compiler")));
-
+   CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( m_Mgr->GetPluginManager()->FindPluginByName(_T("Compiler")));
    cbProject* proj = m_Mgr->GetProjectManager()->GetActiveProject();
-   auto count = proj->GetBuildTargetsCount();
+
+   if (plugin == nullptr || proj == nullptr)
+   {
+        return;
+   }
+   wxJSONValue root;
+   auto count = proj->GetFilesCount();
    for (int i = 0; i < count ; ++i)
    {
-       ProjectBuildTarget* target = proj->GetBuildTarget(i);
+       ProjectFile* projFile = proj->GetFile(i);
+       auto targetNames = projFile->GetBuildTargets();
+       if (targetNames.empty())
+            continue;
+       auto target = proj->GetBuildTarget(targetNames[0]);
 
-       DirectCommands dc(plugin, CompilerFactory::GetCompiler(target->GetCompilerID()), proj);
-       wxArrayString dafuq = dc.GetCompileCommands(target);
+       auto* compiler = CompilerFactory::GetCompiler(target->GetCompilerID());
+       auto switches = compiler->GetSwitches();
+       auto oldLogType = switches.logging;
+       switches.logging = CompilerLoggingType::clogNone;
+       compiler->SetSwitches(switches);
+       wxJSONValue currNode;
+       currNode["directory"] = wxString(".");
+       currNode["file"] = projFile->file.GetFullPath();
+       DirectCommands dc(plugin,compiler, proj);
+       wxString commandLine;
+       wxArrayString dafuq = dc.GetCompileFileCommand(target,projFile);
        for (auto& z : dafuq)
        {
           LoggerAccess::Get()->Append(z);
+          commandLine.Append(z);
        }
+       currNode["command"] = commandLine;
+      switches.logging = oldLogType;
+      compiler->SetSwitches(switches);
+      root.Append(currNode);
 
     }
+    wxJSONWriter writer;
+    wxFileOutputStream outFile("compile_commands.json");
+    writer.Write(root,outFile);
 }
 
 
