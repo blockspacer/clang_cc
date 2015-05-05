@@ -262,8 +262,8 @@ void ClangCC::OnCompileCommands(wxCommandEvent& event)
    {
        ProjectFile* projFile = proj->GetFile(i);
        auto targetNames = projFile->GetBuildTargets();
-       if (targetNames.empty())
-            continue;
+       if (targetNames.IsEmpty())
+        continue;
        auto target = proj->GetBuildTarget(targetNames[0]);
 
        auto* compiler = CompilerFactory::GetCompiler(target->GetCompilerID());
@@ -271,21 +271,31 @@ void ClangCC::OnCompileCommands(wxCommandEvent& event)
        auto oldLogType = switches.logging;
        switches.logging = CompilerLoggingType::clogNone;
        compiler->SetSwitches(switches);
+
        wxJSONValue currNode;
        currNode["directory"] = wxString(".");
-       currNode["file"] = projFile->file.GetFullPath();
+
+       wxString filePath = projFile->file.GetFullPath();
+       filePath.Replace('\\','/',true);
+       currNode["file"] = filePath;
+
        DirectCommands dc(plugin,compiler, proj);
        wxString commandLine;
-       wxArrayString dafuq = dc.GetCompileFileCommand(target,projFile);
-       for (auto& z : dafuq)
+       wxArrayString commandArray = dc.GetCompileFileCommand(target,projFile);
+       for (const auto& z : commandArray)
        {
-          LoggerAccess::Get()->Append(z);
           commandLine.Append(z);
        }
+
+       if (commandLine.IsEmpty())
+           continue;
+
+       commandLine.Replace('\\','/',true);
        currNode["command"] = commandLine;
-      switches.logging = oldLogType;
-      compiler->SetSwitches(switches);
-      root.Append(currNode);
+
+       switches.logging = oldLogType;
+       compiler->SetSwitches(switches);
+       root.Append(currNode);
 
     }
     wxJSONWriter writer;
@@ -546,7 +556,7 @@ void ClangCC::OnReparseFile(wxCommandEvent& event)
     if (!editor)
         return;
     ProjectFile* projFile = editor->GetProjectFile();
-    if (projFile && IsProviderFor(editor))
+    if (projFile && GetProviderStatusFor(editor) == CCProviderStatus::ccpsActive)
     {
         std::thread(&TranslationUnitManager::ReparseProjectFile,
                     &m_TUManager,projFile).detach();
