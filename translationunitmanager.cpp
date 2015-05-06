@@ -67,93 +67,103 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
         m_FilesBeingParsed.push_back(file);
     }
     wxString fileName = file->file.GetFullPath();
+    auto project = file->GetParentProject();
+
+
+    DiagnosticOptions* diagOpts = new DiagnosticOptions();
+    IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
+    auto iter = m_CompilationDatabases.find(project);
+    if(iter == m_CompilationDatabases.end());
+        LoggerAccess::Get()->Append(wxT("Could not find the compilation database for projecr") + project->GetTitle());
+    auto compileCommands = iter->second->getCompileCommands(wx2std(file->file.GetFullPath()));
+    if (compileCommands.empty())
+        LoggerAccess::Get()->Append(wxT("No compile commands for the file") + file->file.GetName());
+    auto args = compileCommands[0].CommandLine;
+
+//    std::vector<const char*> args;
+//    args.push_back("-x");
+//    if (file->compilerVar == _("CC")) // it is a C file
+//        args.push_back("c");
+//    else //else treat as a c++ file
+//        args.push_back("c++");
+    args.push_back("-fsyntax-only");
+    if (!Options::Get().ShouldSpellCheck())
+        args.push_back("-fno-spell-checking");
+
     //Parsing started event.
     ccEvent startEvent(ccEVT_PARSE_START, fileName, nullptr, file);
     AddPendingEvent(startEvent);
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
-    DiagnosticOptions* diagOpts = new DiagnosticOptions();
-    IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
-
-    std::vector<const char*> args;
-    args.push_back("-x");
-    if (file->compilerVar == _("CC")) // it is a C file
-        args.push_back("c");
-    else //else treat as a c++ file
-        args.push_back("c++");
-    args.push_back("-fsyntax-only");
-    if (!Options::Get().ShouldSpellCheck())
-        args.push_back("-fno-spell-checking");
-
     //FIXME These are hacks...
-    args.push_back("-std=gnu++11");
-    args.push_back("-Wno-ignored-attributes");
+//    args.push_back("-std=gnu++11");
+//    args.push_back("-Wno-ignored-attributes");
 
-    std::string fileToParse = wx2std(file->file.GetFullPath());
-    args.push_back(fileToParse.c_str());
+//    std::string fileToParse = wx2std(file->file.GetFullPath());
+//    args.push_back(fileToParse.c_str());
     // Using command line here so clang could find(hopefully) system headers via Driver.
     CompilerInvocation* invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(&args[0],&args[0] + args.size()),
                                                                            diags);
    //Add project wide definitions and include paths.
-    MacrosManager* macrosMgr = Manager::Get()->GetMacrosManager();
-    const wxArrayString& macros = file->GetParentProject()->GetCompilerOptions();
-    for (auto &macro : macros)
-    {
-        wxString definition;
-        //FIXME needs macro replacement? Or we get them already expanded.
-        if (macro.StartsWith(_T("-D"), &definition))
-        {
-            LoggerAccess::Get()->Log(_("\t Preprocessor Definitions  : ") + definition);
-            invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
-        }
-    }
-    const wxArrayString& includeDirs = file->GetParentProject()->GetIncludeDirs();
-
-    for (auto includePath : includeDirs)
-    {
-        macrosMgr->ReplaceMacros(includePath);
-        wxFileName path = wxFileName::DirName(includePath);
-        path.Normalize(wxPATH_NORM_ALL,file->GetParentProject()->GetBasePath());
-        invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
-                                                  clang::frontend::Angled,
-                                                  false,false);
-        LoggerAccess::Get()->Log(_("\t added Project Include Path : ")+path.GetPath());
-
-    }
-    //Add target specific definitions and include paths.
-    if (!file->buildTargets.IsEmpty())
-    {
-        ProjectBuildTarget* target = nullptr;
-        wxString targetName = file->GetParentProject()->GetActiveBuildTarget();
-        int index = file->buildTargets.Index(targetName);
-        index != wxNOT_FOUND ? target = file->GetParentProject()->GetBuildTarget(targetName)
-                             : target = file->GetParentProject()->GetBuildTarget(file->buildTargets[0]);
-        if (target)
-        {
-            const wxArrayString& targetMacros = target->GetCompilerOptions();
-            for (auto &macro : targetMacros)
-            {
-                wxString definition;
-                //FIXME needs macro replacement?
-                if (macro.StartsWith(_T("-D"), &definition))
-                {
-                    LoggerAccess::Get()->Log(_("\t Target Preprocessor Definitions  : ") + definition);
-                    invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
-                }
-            }
-            for (auto includePath : target->GetIncludeDirs())
-            {
-                macrosMgr->ReplaceMacros(includePath, target);
-                wxFileName path = wxFileName::DirName(includePath);
-                path.Normalize(wxPATH_NORM_ALL, file->GetParentProject()->GetBasePath());
-                invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
-                                                          clang::frontend::Angled,
-                                                          false,false);
-                LoggerAccess::Get()->Log(_("\t Added Target Include Path : ")+path.GetPath());
-            }
-        }
-    }
+//    MacrosManager* macrosMgr = Manager::Get()->GetMacrosManager();
+//    const wxArrayString& macros = file->GetParentProject()->GetCompilerOptions();
+//    for (auto &macro : macros)
+//    {
+//        wxString definition;
+//        //FIXME needs macro replacement? Or we get them already expanded.
+//        if (macro.StartsWith(_T("-D"), &definition))
+//        {
+//            LoggerAccess::Get()->Log(_("\t Preprocessor Definitions  : ") + definition);
+//            invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
+//        }
+//    }
+//    const wxArrayString& includeDirs = file->GetParentProject()->GetIncludeDirs();
+//
+//    for (auto includePath : includeDirs)
+//    {
+//        macrosMgr->ReplaceMacros(includePath);
+//        wxFileName path = wxFileName::DirName(includePath);
+//        path.Normalize(wxPATH_NORM_ALL,file->GetParentProject()->GetBasePath());
+//        invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
+//                                                  clang::frontend::Angled,
+//                                                  false,false);
+//        LoggerAccess::Get()->Log(_("\t added Project Include Path : ")+path.GetPath());
+//
+//    }
+//    //Add target specific definitions and include paths.
+//    if (!file->buildTargets.IsEmpty())
+//    {
+//        ProjectBuildTarget* target = nullptr;
+//        wxString targetName = file->GetParentProject()->GetActiveBuildTarget();
+//        int index = file->buildTargets.Index(targetName);
+//        index != wxNOT_FOUND ? target = file->GetParentProject()->GetBuildTarget(targetName)
+//                             : target = file->GetParentProject()->GetBuildTarget(file->buildTargets[0]);
+//        if (target)
+//        {
+//            const wxArrayString& targetMacros = target->GetCompilerOptions();
+//            for (auto &macro : targetMacros)
+//            {
+//                wxString definition;
+//                //FIXME needs macro replacement?
+//                if (macro.StartsWith(_T("-D"), &definition))
+//                {
+//                    LoggerAccess::Get()->Log(_("\t Target Preprocessor Definitions  : ") + definition);
+//                    invocation->getPreprocessorOpts().addMacroDef(wx2std(definition));
+//                }
+//            }
+//            for (auto includePath : target->GetIncludeDirs())
+//            {
+//                macrosMgr->ReplaceMacros(includePath, target);
+//                wxFileName path = wxFileName::DirName(includePath);
+//                path.Normalize(wxPATH_NORM_ALL, file->GetParentProject()->GetBasePath());
+//                invocation->getHeaderSearchOpts().AddPath(wx2std(path.GetPath()),
+//                                                          clang::frontend::Angled,
+//                                                          false,false);
+//                LoggerAccess::Get()->Log(_("\t Added Target Include Path : ")+path.GetPath());
+//            }
+//        }
+//    }
 
     PreprocessorOptions &ppOpts = invocation->getPreprocessorOpts();
     ppOpts.RemappedFilesKeepOriginalName = true;
@@ -336,4 +346,20 @@ void TranslationUnitManager::RemoveProject(cbProject* project)
 {
     std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
     m_ProjectTranslationUnits.erase(project);
+    m_CompilationDatabases.erase(project);
 }
+void TranslationUnitManager::OnProjectOpened(CodeBlocksEvent& event)
+{
+	cbProject* project = event.GetProject();
+	std::string errorMessage;
+	auto database = clang::tooling::CompilationDatabase::loadFromDirectory(wx2std(project->GetBasePath()),errorMessage);
+	if (database == nullptr)
+	{
+
+	}
+	else
+	{
+        m_CompilationDatabases.insert(std::make_pair(project,std::move(database)));
+    }
+}
+

@@ -27,6 +27,7 @@
 #include <clang/Sema/CodeCompleteConsumer.h>
 
 #include <clang/Lex/Lexer.h>
+#include <clang/Tooling/JSONCompilationDatabase.h>
 
 
 #pragma pop_macro("_")

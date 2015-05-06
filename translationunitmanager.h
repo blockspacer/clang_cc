@@ -61,6 +61,7 @@ public:
     std::vector<ASTMemoryUsage> GetMemoryUsageForProjectFile(ProjectFile* file);
     void RemoveProject(cbProject* project);
     void RemoveFile(cbProject* project,const wxString& fileName);
+    void OnProjectOpened(CodeBlocksEvent& event);
     void Clear();
 private:
     std::map<cbProject*,ParserMapType> m_ProjectTranslationUnits;
@@ -68,6 +69,7 @@ private:
     ClangCC& m_CC;
     std::mutex m_ProjectsMapMutex;
     std::mutex m_FilesBeingParsedMutex;
+    std::map<cbProject*,std::unique_ptr<clang::tooling::CompilationDatabase>> m_CompilationDatabases;
 };
 
 #endif // TRANSLATIONUNITMANAGER_H_
