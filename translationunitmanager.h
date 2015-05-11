@@ -58,6 +58,7 @@ public:
     bool     AddASTUnitForProjectFile(ProjectFile* file, ASTUnit* tu);
     ASTUnit* ReparseProjectFile(ProjectFile* file);
     bool IsFileBeingParsed(ProjectFile* file);
+    bool CreateCompilationDatabase(cbProject* proj);
     std::vector<ASTMemoryUsage> GetMemoryUsageForProjectFile(ProjectFile* file);
     void RemoveProject(cbProject* project);
     void RemoveFile(cbProject* project,const wxString& fileName);

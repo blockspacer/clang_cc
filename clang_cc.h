@@ -62,7 +62,6 @@ public:
     // SDK project related events
     void OnProjectClosed(CodeBlocksEvent& event);
     void OnProjectSaved(CodeBlocksEvent& event);
-    void OnProjectOpened(CodeBlocksEvent& event);
     void OnProjectFileAdded(CodeBlocksEvent& event);
     void OnProjectFileRemoved(CodeBlocksEvent& event);
     void OnProjectFileChanged(CodeBlocksEvent& event);
@@ -77,7 +76,6 @@ public:
     void OnEditorActivatedTimer(wxTimerEvent& event);
     void OnReparseTimer(wxTimerEvent& event);
     // Clang events.
-    void OnCompileCommands(wxCommandEvent& event);
     void OnReparseFile(wxCommandEvent& event);
     void OnCodeComplete(CodeBlocksEvent& event);
     void OnMemoryUsage(wxCommandEvent& event);

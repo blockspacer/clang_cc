@@ -20,7 +20,11 @@
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Lex/Preprocessor.h>
 
-
+#include <compilergcc.h>
+#include <directcommands.h>
+#include "wx/jsonval.h"
+#include "wx/jsonwriter.h"
+#include <wx/wfstream.h>
 
 #include "ccevents.h"
 #include "clangcclogger.h"
@@ -36,9 +40,7 @@
 using namespace clang;
 TranslationUnitManager::TranslationUnitManager(ClangCC& CC):
     m_CC(CC)
-{
-
-}
+{}
 
 bool TranslationUnitManager::AddASTUnitForProjectFile(ProjectFile* file, ASTUnit* tu)
 {
@@ -276,6 +278,60 @@ std::vector<ASTMemoryUsage> TranslationUnitManager::GetMemoryUsageForProjectFile
     return usages;
 }
 
+bool TranslationUnitManager::CreateCompilationDatabase(cbProject* proj)
+{
+   CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( Manager::Get()->GetPluginManager()->FindPluginByName(_T("Compiler")));
+   if (plugin == nullptr || proj == nullptr)
+        return false;
+
+   wxJSONValue root;
+   auto count = proj->GetFilesCount();
+   for (int i = 0; i < count ; ++i)
+   {
+       ProjectFile* projFile = proj->GetFile(i);
+       auto targetNames = projFile->GetBuildTargets();
+       if (targetNames.IsEmpty())
+        continue;
+       auto target = proj->GetBuildTarget(targetNames[0]);
+
+       auto* compiler = CompilerFactory::GetCompiler(target->GetCompilerID());
+       auto switches = compiler->GetSwitches();
+       auto oldLogType = switches.logging;
+       switches.logging = CompilerLoggingType::clogNone;
+       compiler->SetSwitches(switches);
+
+       wxJSONValue currNode;
+       currNode["directory"] = wxString(".");
+
+       wxString filePath = projFile->file.GetFullPath();
+       filePath.Replace('\\','/',true);
+       currNode["file"] = filePath;
+
+       DirectCommands dc(plugin,compiler, proj);
+       wxString commandLine;
+       wxArrayString commandArray = dc.GetCompileFileCommand(target,projFile);
+       for (const auto& z : commandArray)
+       {
+          commandLine.Append(z);
+       }
+
+       if (commandLine.IsEmpty())
+           continue;
+
+       commandLine.Replace('\\','/',true);
+       currNode["command"] = commandLine;
+
+       switches.logging = oldLogType;
+       compiler->SetSwitches(switches);
+       root.Append(currNode);
+
+    }
+    wxJSONWriter writer;
+    wxFileOutputStream outFile("compile_commands.json");
+    writer.Write(root,outFile);
+    return true;
+}
+
 void TranslationUnitManager::Clear()
 {
     std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
@@ -306,11 +362,10 @@ void TranslationUnitManager::OnProjectOpened(CodeBlocksEvent& event)
 	auto database = clang::tooling::CompilationDatabase::loadFromDirectory(wx2std(project->GetBasePath()),errorMessage);
 	if (database == nullptr)
 	{
-        LoggerAccess::Get()->Log(std2wx(errorMessage));
+        if (CreateCompilationDatabase(project))
+            database =  clang::tooling::CompilationDatabase::loadFromDirectory(wx2std(project->GetBasePath()),errorMessage);
 	}
-	else
-	{
-        m_CompilationDatabases.insert(std::make_pair(project,std::move(database)));
-    }
+    m_CompilationDatabases.insert(std::make_pair(project,std::move(database)));
+
 }
 

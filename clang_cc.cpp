@@ -12,8 +12,7 @@
 #include <cbauibook.h>
 #include <compilercommandgenerator.h>
 #include <compilerfactory.h>
-#include <compilergcc.h>
-#include <directcommands.h>
+
 
 
 
@@ -27,9 +26,7 @@
 #include "tooltipevaluator.h"
 #include "ccevents.h"
 
-#include "wx/jsonval.h"
-#include "wx/jsonwriter.h"
-#include <wx/wfstream.h>
+
 
 #define SCI_GETTEXT 2182
 
@@ -50,7 +47,6 @@ namespace
     int idEditorActivatedTimer      = wxNewId();
     int idReparseTimer              = wxNewId();
     int idSaveAST                   = wxNewId();
-    int idCompileCommands           = wxNewId();
 }
 
 #define EDITOR_ACTIVATED_DELAY    300
@@ -63,7 +59,6 @@ BEGIN_EVENT_TABLE(ClangCC, cbCodeCompletionPlugin)
     EVT_MENU(idSaveAST, ClangCC::OnSaveAST)
     EVT_MENU (idEditorGotoDeclaration,  ClangCC::OnGotoItemDeclaration)
     EVT_MENU (idEditorGotoDefinition,  ClangCC::OnGotoItemDefinition)
-    EVT_MENU (idCompileCommands, ClangCC::OnCompileCommands)
 END_EVENT_TABLE()
 
 
@@ -114,7 +109,7 @@ void ClangCC::OnAttach()
 
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_CLOSE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectClosed));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_SAVE,         new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectSaved));
-    m_Mgr->RegisterEventSink(cbEVT_PROJECT_OPEN,         new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectOpened));
+    m_Mgr->RegisterEventSink(cbEVT_PROJECT_OPEN,         new cbEventFunctor<TranslationUnitManager, CodeBlocksEvent>(&m_TUManager, &TranslationUnitManager::OnProjectOpened));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_ADDED,   new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileAdded));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_REMOVED, new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileRemoved));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_CHANGED, new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileChanged));
@@ -179,7 +174,6 @@ void ClangCC::BuildMenu(wxMenuBar* menuBar)
     clangCCMenu->Append(idReparseFile,_("Reparse File"));
     clangCCMenu->Append(idMemoryUsage,_("Show Memory Usage"));
     clangCCMenu->Append(idSaveAST, _("Save AST File"));
-    clangCCMenu->Append(idCompileCommands, _("CompileCommands"));
     menuBar->Insert(index + 1, clangCCMenu,_("&Clang_CC"));
 }
 void ClangCC::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
@@ -248,62 +242,6 @@ void ClangCC::OnSaveAST(wxCommandEvent& event)
 
 
 }
-void ClangCC::OnCompileCommands(wxCommandEvent& event)
-{
-   CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( m_Mgr->GetPluginManager()->FindPluginByName(_T("Compiler")));
-   cbProject* proj = m_Mgr->GetProjectManager()->GetActiveProject();
-
-   if (plugin == nullptr || proj == nullptr)
-   {
-        return;
-   }
-   wxJSONValue root;
-   auto count = proj->GetFilesCount();
-   for (int i = 0; i < count ; ++i)
-   {
-       ProjectFile* projFile = proj->GetFile(i);
-       auto targetNames = projFile->GetBuildTargets();
-       if (targetNames.IsEmpty())
-        continue;
-       auto target = proj->GetBuildTarget(targetNames[0]);
-
-       auto* compiler = CompilerFactory::GetCompiler(target->GetCompilerID());
-       auto switches = compiler->GetSwitches();
-       auto oldLogType = switches.logging;
-       switches.logging = CompilerLoggingType::clogNone;
-       compiler->SetSwitches(switches);
-
-       wxJSONValue currNode;
-       currNode["directory"] = wxString(".");
-
-       wxString filePath = projFile->file.GetFullPath();
-       filePath.Replace('\\','/',true);
-       currNode["file"] = filePath;
-
-       DirectCommands dc(plugin,compiler, proj);
-       wxString commandLine;
-       wxArrayString commandArray = dc.GetCompileFileCommand(target,projFile);
-       for (const auto& z : commandArray)
-       {
-          commandLine.Append(z);
-       }
-
-       if (commandLine.IsEmpty())
-           continue;
-
-       commandLine.Replace('\\','/',true);
-       currNode["command"] = commandLine;
-
-       switches.logging = oldLogType;
-       compiler->SetSwitches(switches);
-       root.Append(currNode);
-
-    }
-    wxJSONWriter writer;
-    wxFileOutputStream outFile("compile_commands.json");
-    writer.Write(root,outFile);
-}
-
 
 ClangCC::CCProviderStatus ClangCC::GetProviderStatusFor(cbEditor* ed)
 {
@@ -602,10 +540,6 @@ void ClangCC::OnProjectClosed(CodeBlocksEvent& event)
 }
 void ClangCC::OnProjectSaved(CodeBlocksEvent& event)
 {
-}
-void ClangCC::OnProjectOpened(CodeBlocksEvent& event)
-{
-    m_TUManager.OnProjectOpened(event);
 }
 
 void ClangCC::OnProjectFileAdded(CodeBlocksEvent& event)
