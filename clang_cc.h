@@ -62,9 +62,11 @@ public:
     // SDK project related events
     void OnProjectClosed(CodeBlocksEvent& event);
     void OnProjectSaved(CodeBlocksEvent& event);
+    void OnProjectOpened(CodeBlocksEvent& event);
     void OnProjectFileAdded(CodeBlocksEvent& event);
     void OnProjectFileRemoved(CodeBlocksEvent& event);
     void OnProjectFileChanged(CodeBlocksEvent& event);
+
     //SDK editor related events
     void OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent);
     void OnEditorSaveOrModified(CodeBlocksEvent& event);

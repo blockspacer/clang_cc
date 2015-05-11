@@ -114,7 +114,7 @@ void ClangCC::OnAttach()
 
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_CLOSE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectClosed));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_SAVE,         new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectSaved));
-    m_Mgr->RegisterEventSink(cbEVT_PROJECT_OPEN,         new cbEventFunctor<TranslationUnitManager, CodeBlocksEvent>(&m_TUManager, &TranslationUnitManager::OnProjectOpened));
+    m_Mgr->RegisterEventSink(cbEVT_PROJECT_OPEN,         new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectOpened));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_ADDED,   new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileAdded));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_REMOVED, new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileRemoved));
     m_Mgr->RegisterEventSink(cbEVT_PROJECT_FILE_CHANGED, new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnProjectFileChanged));
@@ -603,6 +603,11 @@ void ClangCC::OnProjectClosed(CodeBlocksEvent& event)
 void ClangCC::OnProjectSaved(CodeBlocksEvent& event)
 {
 }
+void ClangCC::OnProjectOpened(CodeBlocksEvent& event)
+{
+    m_TUManager.OnProjectOpened(event);
+}
+
 void ClangCC::OnProjectFileAdded(CodeBlocksEvent& event)
 {
 }
