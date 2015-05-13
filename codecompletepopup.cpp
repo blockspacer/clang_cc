@@ -91,19 +91,27 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
 	switch (event.GetKeyCode())
     {
         case WXK_UP:
-            m_CompleteListCtrl->Select(m_CompleteListCtrl->GetFirstSelected()-1);
+            m_CompleteListCtrl->Select(std::max<int>(0,m_CompleteListCtrl->GetFirstSelected()-1));
+            m_CompleteListCtrl->SetItemBackgroundColour(m_CompleteListCtrl->GetFirstSelected(),wxColor(0,0,255));
             return;
         case WXK_DOWN:
-            m_CompleteListCtrl->Select(m_CompleteListCtrl->GetFirstSelected()+1);
+            m_CompleteListCtrl->Select(std::min<int>(m_CompleteListCtrl->GetFirstSelected() + 1, m_CompleteListCtrl->GetItemCount() - 1));
+            m_CompleteListCtrl->SetItemBackgroundColour(m_CompleteListCtrl->GetFirstSelected(),wxColor(0,0,255));
             return;
         case WXK_PAGEUP:
-            {int item = std::max<int>(0, m_CompleteListCtrl->GetFirstSelected() - ROW_COUNT);
-            m_CompleteListCtrl->Select(item);}
+            {
+                int item = std::max<int>(0, m_CompleteListCtrl->GetFirstSelected() - ROW_COUNT);
+                m_CompleteListCtrl->Select(item);
+                m_CompleteListCtrl->SetItemBackgroundColour(item, wxColor(0,0,255));
+            }
             return;
         case WXK_PAGEDOWN:
-            {int item = std::min<int>(m_CompleteListCtrl->GetItemCount() - 1,
-                                m_CompleteListCtrl->GetFirstSelected() + ROW_COUNT);
-            m_CompleteListCtrl->Select(item);}
+            {
+                int item = std::min<int>(m_CompleteListCtrl->GetItemCount() - 1,
+                                    m_CompleteListCtrl->GetFirstSelected() + ROW_COUNT);
+                m_CompleteListCtrl->Select(item);
+                m_CompleteListCtrl->SetItemBackgroundColour(item, wxColor(0,0,255));
+            }
             return;
         case WXK_TAB:
         case WXK_RETURN:
@@ -134,7 +142,6 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
             break;
 
     }
-   //We don't let the pro
    event.Skip();
 
 }

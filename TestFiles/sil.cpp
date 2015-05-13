@@ -39,10 +39,13 @@ int zoo()
 {
     templ<float,double> zoof;
     zoof.foo(5);
+
+
     templ<Domo*,int> doof;
     doof.foo('c');
     templ<int, char> coof;
     coof.foo(65);
+
 
 
 

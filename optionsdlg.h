@@ -11,6 +11,8 @@ public:
     virtual wxString GetBitmapBaseName() const { return _("clang_cc"); }
     virtual void OnApply();
     virtual void OnCancel();
+private:
+    wxTextCtrl* m_ClangOptionsTextCtrl;
 };
 
 #endif //OPTIONSDLG_H_

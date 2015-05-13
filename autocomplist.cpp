@@ -15,7 +15,7 @@ AutoCompList::AutoCompList(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
 {
 	InsertColumn(0, _("TypedText"));
     wxImageList* imglist = new wxImageList(16,16,true,0);
-    //SetBackgroundColour(wxColour(0,0,255));
+    SetBackgroundColour(*wxGREEN);
 	imglist->Add(wxXmlResource::Get()->LoadBitmap(_("browser_images")));
 	AssignImageList(imglist, wxIMAGE_LIST_SMALL);
 }

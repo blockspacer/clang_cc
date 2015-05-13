@@ -21,6 +21,17 @@ OptionsPanel::OptionsPanel(wxWindow* parent)
     //Translation Unit Options
     XRCCTRL(*this, "chk_skip_function_bodies", wxCheckBox)->SetValue(cfg->ReadBool(_T("/tu_skip_function_bodies"), true));
     XRCCTRL(*this, "chk_spell_check", wxCheckBox)->SetValue(cfg->ReadBool(_T("/tu_spell_check"), true));
+    m_ClangOptionsTextCtrl = XRCCTRL(*this, "txt_clang_options", wxTextCtrl);
+    wxArrayString clangOptions;
+    cfg->Read(_T("/tu_clang_options"), &clangOptions);
+    for (const auto& line : clangOptions)
+    {
+        *m_ClangOptionsTextCtrl << line << "\n";
+    }
+
+
+
+
 }
 OptionsPanel::~OptionsPanel()
 {}
@@ -38,6 +49,14 @@ void OptionsPanel::OnApply()
     //Translation Unit Options
     cfg->Write(_T("/tu_skip_function_bodies"),  XRCCTRL(*this, "chk_skip_function_bodies", wxCheckBox)->GetValue());
     cfg->Write(_T("/tu_spell_check"),  XRCCTRL(*this, "chk_spell_check", wxCheckBox)->GetValue());
+
+    auto lineCount = m_ClangOptionsTextCtrl->GetNumberOfLines();
+    wxArrayString clangOptions;
+    for (auto i = 0; i < lineCount; ++ i)
+    {
+        clangOptions.push_back(m_ClangOptionsTextCtrl->GetLineText(i));
+    }
+    cfg->Write(_T("/tu_clang_options"), clangOptions);
     Options::Get().Populate();
 }
 void OptionsPanel::OnCancel()
