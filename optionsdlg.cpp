@@ -28,10 +28,6 @@ OptionsPanel::OptionsPanel(wxWindow* parent)
     {
         *m_ClangOptionsTextCtrl << line << "\n";
     }
-
-
-
-
 }
 OptionsPanel::~OptionsPanel()
 {}

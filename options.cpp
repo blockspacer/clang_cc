@@ -25,6 +25,14 @@ void Options::Populate()
     //Translation Unit Options
     m_SkipFunctionBodies = cfg->ReadBool(_T("/tu_skip_function_bodies"));
     m_SpellCheck = cfg->ReadBool(_T("/tu_spell_check"));
+    wxArrayString clangOptions;
+    cfg->Read(_T("/tu_clang_options"), &clangOptions);
+    m_ClangOptions.clear();
+    for (const auto& option : clangOptions)
+    {
+        m_ClangOptions.push_back(wx2std(option));
+    }
+
 
 }
 CCListedResultTypes Options::GetListedResultTypes()

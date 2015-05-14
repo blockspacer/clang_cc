@@ -93,6 +93,9 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     args.push_back("-fsyntax-only");
     if (!Options::Get().ShouldSpellCheck())
         args.push_back("-fno-spell-checking");
+    //Get Additional compile options from the config panel
+    auto addOptions = Options::Get().GetCompilerOptions();
+    args.insert(args.end(), addOptions.begin(), addOptions.end());
 
     {   //if the file is already being parsed return immediately.
         std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);

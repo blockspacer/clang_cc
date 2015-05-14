@@ -1,3 +1,4 @@
+
 struct Domo
 {
 
@@ -23,6 +24,7 @@ struct templ<U*,int>
     {
         return m_Val;
     }
+
 };
 template <>
 struct templ<int,char>
@@ -40,13 +42,10 @@ int zoo()
     templ<float,double> zoof;
     zoof.foo(5);
 
-
     templ<Domo*,int> doof;
     doof.foo('c');
+    int ss;
     templ<int, char> coof;
     coof.foo(65);
-
-
-
-
+    coof.char_val =45;
 }

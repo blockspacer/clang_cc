@@ -135,6 +135,7 @@ public:
     FilterPredicateType MakeStringFilter(const wxString& filter);
     bool ShouldSkipFunctionBodies() { return m_SkipFunctionBodies; }
     bool ShouldSpellCheck() { return m_SpellCheck; }
+    std::vector<std::string> GetCompilerOptions() {return m_ClangOptions;}
 
 private:
     Options();
@@ -147,6 +148,7 @@ private:
     bool m_CaseInsensitiveFilter;
     bool m_SkipFunctionBodies;
     bool m_SpellCheck;
+    std::vector<std::string> m_ClangOptions;
 
 };
 #endif // OPTIONS_H_

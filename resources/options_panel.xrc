@@ -131,7 +131,9 @@
 									<object class="wxStaticBoxSizer">
 										<label>Clang options</label>
 										<object class="sizeritem">
-											<object class="wxTextCtrl" name="txt_clang_options" />
+											<object class="wxTextCtrl" name="txt_clang_options">
+												<style>wxTE_PROCESS_ENTER|wxTE_MULTILINE</style>
+											</object>
 											<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 											<border>5</border>
 											<option>1</option>
