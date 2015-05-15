@@ -1,5 +1,4 @@
-#ifndef STRINGIO_H_
-#define STRINGIO_H_
+#pragma once
 
 #include <wx/string.h>
 #include "clangcommon.h"
@@ -46,4 +45,4 @@ public:
         m_Str.assign(str);
     }
 };
-#endif // STRINGIO_H_
+

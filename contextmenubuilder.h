@@ -1,5 +1,4 @@
-#ifndef CONTEXTMENUBUILDER_H_
-#define CONTEXTMENUBUILDER_H_
+#pragma once
 
 #include <clang/AST/DeclVisitor.h>
 #include <clang/AST/StmtVisitor.h>
@@ -118,4 +117,3 @@ public:
 private:
     wxMenu* m_Menu;
 };
-#endif // CONTEXTMENUBUILDER_H_

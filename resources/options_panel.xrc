@@ -1,37 +1,32 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<resource xmlns="http://www.wxwidgets.org/wxxrc">
+<?xml version="1.0" encoding="UTF-8" ?>
+<resource version="2.3.0.1" xmlns="http://www.wxwidgets.org/wxxrc">
 	<object class="wxPanel" name="options_panel">
-		<size>426,428</size>
+		<size>600,300</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
-				<object class="wxNotebook" name="ID_NOTEBOOK1">
-					<object class="notebookpage">
+				<object class="wxTreebook" name="ID_LISTBOOK1">
+					<size>430,254</size>
+					<object class="treebookpage">
 						<object class="wxPanel" name="ID_PANEL1">
-							<size>317,238</size>
+							<exstyle>wxWS_EX_VALIDATE_RECURSIVELY</exstyle>
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
 								<object class="sizeritem">
-									<object class="wxCheckBox" name="ID_CHECKBOX1">
-										<label>Label</label>
-									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
-									<border>5</border>
-								</object>
-								<object class="sizeritem">
 									<object class="wxStaticBoxSizer">
 										<label>Options</label>
+										<orient>wxVERTICAL</orient>
 										<object class="sizeritem">
 											<object class="wxCheckBox" name="chk_cache_cc_results">
 												<label>Cache code completion results</label>
 												<tooltip>Faster(Noticably) but some type information might be lost.</tooltip>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 											<border>5</border>
 											<option>1</option>
 										</object>
 									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 								</object>
 								<object class="sizeritem">
@@ -42,44 +37,46 @@
 											<object class="wxCheckBox" name="chk_inc_macros">
 												<label>Include Macros</label>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 											<border>5</border>
 										</object>
 										<object class="sizeritem">
 											<object class="wxCheckBox" name="chk_inc_patterns">
 												<label>Include Code Patterns</label>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 											<border>5</border>
 										</object>
 										<object class="sizeritem">
 											<object class="wxCheckBox" name="chk_inc_keywords">
 												<label>Include Keywords</label>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 											<border>5</border>
 										</object>
 										<object class="sizeritem">
 											<object class="wxCheckBox" name="chk_inc_comments">
 												<label>Include Comments</label>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 											<border>5</border>
 										</object>
 									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 								</object>
 							</object>
 						</object>
 						<label>Code Completion</label>
 					</object>
-					<object class="notebookpage">
+					<object class="treebookpage">
 						<object class="wxPanel" name="ID_PANEL2">
+							<exstyle>wxWS_EX_VALIDATE_RECURSIVELY</exstyle>
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
 								<object class="sizeritem">
 									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
 										<object class="sizeritem">
 											<object class="wxRadioBox" name="rb_string_filter_type">
 												<label>Label</label>
@@ -87,29 +84,28 @@
 													<item>Short Hand</item>
 													<item>Acronym</item>
 												</content>
-												<default>-1</default>
 												<tooltip>Use shorthand or acronym filters when matching the entries in code complete list box. For example &lt;size&gt; matches &lt;GetSize&gt; in shorthand mode. It also matches &lt;specialize&gt; in acronym mode.</tooltip>
 											</object>
-											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 										</object>
 										<object class="sizeritem">
 											<object class="wxCheckBox" name="chk_case_insensitive_filter">
 												<label>Case Insensitive</label>
 											</object>
-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxALL|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 											<option>1</option>
 										</object>
 									</object>
-									<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxALL|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 									<border>5</border>
 								</object>
 							</object>
 						</object>
 						<label>CC List</label>
 					</object>
-					<object class="notebookpage">
+					<object class="treebookpage">
 						<object class="wxPanel" name="ID_PANEL3">
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
@@ -117,29 +113,30 @@
 									<object class="wxCheckBox" name="chk_skip_function_bodies">
 										<label>Skip function bodies</label>
 									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 								</object>
 								<object class="sizeritem">
 									<object class="wxCheckBox" name="chk_spell_check">
 										<label>Spell check</label>
 									</object>
-									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 								</object>
 								<object class="sizeritem">
 									<object class="wxStaticBoxSizer">
 										<label>Clang options</label>
+										<orient>wxVERTICAL</orient>
 										<object class="sizeritem">
 											<object class="wxTextCtrl" name="txt_clang_options">
 												<style>wxTE_PROCESS_ENTER|wxTE_MULTILINE</style>
 											</object>
-											<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxALL|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 											<option>1</option>
 										</object>
 									</object>
-									<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<flag>wxALL|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 									<option>1</option>
 								</object>
@@ -148,7 +145,7 @@
 						<label>TU Options</label>
 					</object>
 				</object>
-				<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<flag>wxALL|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP</flag>
 				<border>5</border>
 				<option>1</option>
 			</object>

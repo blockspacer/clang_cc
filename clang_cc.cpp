@@ -128,8 +128,6 @@ void ClangCC::OnAttach()
 
 void ClangCC::OnRelease(bool appShutDown)
 {
-    if (!appShutDown)
-    {
         EditorHooks::UnregisterHook(m_EditorHookId);
         m_Mgr->RemoveAllEventSinksFor(this);
 
@@ -150,7 +148,6 @@ void ClangCC::OnRelease(bool appShutDown)
         m_TUManager.Unbind(ccEVT_PARSE_END, &ClangCC::OnParseEnd,this);
         m_TUManager.Unbind(ccEVT_REPARSE_END, &ClangCC::OnParseEnd,this);
         m_TUManager.Clear();
-    }
 }
 
 int ClangCC::Configure()

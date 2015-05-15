@@ -1,5 +1,4 @@
-#ifndef MEMORYUSAGE_H_
-#define MEMORYUSAGE_H_
+#pragma once
 
 #include "wx/dialog.h"
 #include "translationunitmanager.h"
@@ -10,4 +9,4 @@ public:
     MemoryUsageDlg(wxWindow* parent,std::vector<ASTMemoryUsage>);
     virtual ~MemoryUsageDlg(){};
 };
-#endif // MEMORYUSAGE_H_
+

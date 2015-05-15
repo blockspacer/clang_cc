@@ -1,6 +1,5 @@
 
-#ifndef CCEVENTS_H_
-#define CCEVENTS_H_
+#pragma once
 
 #include <wx/event.h>
 
@@ -79,4 +78,4 @@ wxDECLARE_EVENT(ccEVT_REPARSE_END,ccEvent);
 //#define EVT_REPARSE_START(func)  wx__DECLARE_EVT0(ccEVT_REPARSE_START, ccEventHandler(func))
 //#define EVT_REPARSE_END(func)  wx__DECLARE_EVT0(ccEVT_REPARSE_END, ccEventHandler(func))
 //
-#endif // CCEVENTS_H_
+

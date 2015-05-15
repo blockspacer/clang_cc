@@ -1,5 +1,4 @@
-#ifndef DIAGNOSTICPRINTER_H_
-#define DIAGNOSTICPRINTER_H_
+#pragma once
 
 #include <string>
 #include <set>
@@ -38,4 +37,4 @@ private:
 };
 
 
-#endif // DIAGNOSTICPRINTER_H_
+

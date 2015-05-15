@@ -1,6 +1,5 @@
 
-#ifndef CODELAYOUTASTVISITOR_H_
-#define CODELAYOUTASTVISITOR_H_
+#pragma once
 
 
 
@@ -202,5 +201,3 @@ private:
 
 
 
-
-#endif // CODELAYOUTASTVISITOR_H_

@@ -1,6 +1,5 @@
 
-#ifndef OPTIONS_H_
-#define OPTIONS_H_
+#pragma once
 #include <functional>
 #include "stringio.h"
 #include "codecompletepopup.h"
@@ -151,4 +150,4 @@ private:
     std::vector<std::string> m_ClangOptions;
 
 };
-#endif // OPTIONS_H_
+

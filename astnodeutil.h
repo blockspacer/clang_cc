@@ -1,5 +1,4 @@
-#ifndef ASTNODEUTIL_H_
-#define ASTNODEUTIL_H_
+#pragma once
 #include <clang/AST/Decl.h>
 #include "ASTnodefinder.h"
 namespace ASTNode
@@ -31,4 +30,4 @@ void GotoDeclarationInEditor(const clang::Decl* decl);
 void SelectDeclarationInEditor(const clang::Decl* decl);
 
 }
-#endif // ASTNODEUTIL_H_
+

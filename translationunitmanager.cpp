@@ -5,8 +5,8 @@
 #include <editormanager.h>
 #include <cbeditor.h>
 #include <cbproject.h>
-#include "macrosmanager.h"
 #include <cbstyledtextctrl.h>
+#include <compilerfactory.h>
 
 #include <llvm/Support/Host.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -20,8 +20,6 @@
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Lex/Preprocessor.h>
 
-#include <compilergcc.h>
-#include <directcommands.h>
 #include "wx/jsonval.h"
 #include "wx/jsonwriter.h"
 #include <wx/wfstream.h>
@@ -32,6 +30,7 @@
 #include "util.h"
 #include "diagnosticprinter.h"
 #include "options.h"
+#include "commandlinegenerator.h"
 
 
 
@@ -65,8 +64,14 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     wxString fileName = file->file.GetFullPath();
     auto project = file->GetParentProject();
 
-    DiagnosticOptions* diagOpts = new DiagnosticOptions();
-    IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
+    {   //if the file is already being parsed return immediately.
+        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
+        auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
+        if (it != m_FilesBeingParsed.end())
+            return nullptr;
+        m_FilesBeingParsed.push_back(file);
+    }
+
 
     auto iter = m_CompilationDatabases.find(project);
 
@@ -89,21 +94,12 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     LoggerAccess::Get()->Log(commandLine);
 #endif
 
-
-    args.push_back("-fsyntax-only");
     if (!Options::Get().ShouldSpellCheck())
         args.push_back("-fno-spell-checking");
     //Get Additional compile options from the config panel
     auto addOptions = Options::Get().GetCompilerOptions();
     args.insert(args.end(), addOptions.begin(), addOptions.end());
 
-    {   //if the file is already being parsed return immediately.
-        std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
-        auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
-        if (it != m_FilesBeingParsed.end())
-            return nullptr;
-        m_FilesBeingParsed.push_back(file);
-    }
 
     //Parsing started event.
     ccEvent startEvent(ccEVT_PARSE_START, fileName, nullptr, file);
@@ -117,6 +113,9 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     std::transform(args.begin(), args.end(), std::back_inserter(argsinChar),
                         [](const std::string& strings){return strings.c_str();});
 
+    DiagnosticOptions* diagOpts = new DiagnosticOptions();
+    IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
+
     CompilerInvocation* invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(argsinChar),
                                                                            diags);
 
@@ -127,6 +126,10 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
     invocation->getFrontendOpts().SkipFunctionBodies = Options::Get().ShouldSkipFunctionBodies();
 
+  //  invocation->getHeaderSearchOpts().UseBuiltinIncludes = true;
+  //  invocation->getHeaderSearchOpts().UseStandardSystemIncludes = true;
+  //  invocation->getHeaderSearchOpts().UseStandardCXXIncludes = true;
+    invocation->getHeaderSearchOpts().Verbose=true;
 
     auto ast = ASTUnit::LoadFromCompilerInvocation(invocation,diags,
                                                        true, /* OnlyLocalDecls */
@@ -283,34 +286,26 @@ std::vector<ASTMemoryUsage> TranslationUnitManager::GetMemoryUsageForProjectFile
 
 bool TranslationUnitManager::CreateCompilationDatabase(cbProject* proj)
 {
-   CompilerGCC* plugin = dynamic_cast<CompilerGCC*>( Manager::Get()->GetPluginManager()->FindPluginByName(_T("Compiler")));
-   if (plugin == nullptr || proj == nullptr)
-        return false;
-
    wxJSONValue root;
    auto count = proj->GetFilesCount();
+
    for (int i = 0; i < count ; ++i)
    {
        ProjectFile* projFile = proj->GetFile(i);
        auto targetNames = projFile->GetBuildTargets();
        if (targetNames.IsEmpty())
-        continue;
+           continue;
        auto target = proj->GetBuildTarget(targetNames[0]);
 
        auto* compiler = CompilerFactory::GetCompiler(target->GetCompilerID());
-       auto switches = compiler->GetSwitches();
-       auto oldLogType = switches.logging;
-       switches.logging = CompilerLoggingType::clogNone;
-       compiler->SetSwitches(switches);
 
        wxJSONValue currNode;
        currNode["directory"] = wxString(".");
-
+       //Compilation database cannot read windows style slashes
        wxString filePath = projFile->file.GetFullPath();
-       filePath.Replace('\\','/',true);
-       currNode["file"] = filePath;
+       currNode["file"] = UnixFilename(filePath,wxPATH_UNIX);
 
-       DirectCommands dc(plugin,compiler, proj);
+       CommandLineGenerator dc(compiler, proj);
        wxString commandLine;
        wxArrayString commandArray = dc.GetCompileFileCommand(target,projFile);
        for (const auto& z : commandArray)
@@ -321,13 +316,8 @@ bool TranslationUnitManager::CreateCompilationDatabase(cbProject* proj)
        if (commandLine.IsEmpty())
            continue;
 
-       commandLine.Replace('\\','/',true);
-       currNode["command"] = commandLine;
-
-       switches.logging = oldLogType;
-       compiler->SetSwitches(switches);
+       currNode["command"] = UnixFilename(commandLine,wxPATH_UNIX);
        root.Append(currNode);
-
     }
     wxJSONWriter writer;
     wxFileOutputStream outFile("compile_commands.json");

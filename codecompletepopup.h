@@ -1,6 +1,4 @@
-#ifndef CODECOMPLETEPOPUP_H_
-#define CODECOMPLETEPOPUP_H_
-
+#pragma once
 
 #include <wx/popupwin.h>
 #include <cbeditor.h>
@@ -69,4 +67,4 @@ private:
 	wxPopupWindow* m_FilterPopup;
 	DECLARE_EVENT_TABLE()
 };
-#endif // CODECOMPLETEPOPUP_H_
+

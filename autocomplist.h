@@ -1,5 +1,4 @@
-#ifndef AUTOCOMPLIST_H_
-#define AUTOCOMPLIST_H_
+#pragma once
 
 #include <wx/listctrl.h>
 #include <vector>
@@ -21,5 +20,5 @@ public:
 private:
 	std::vector<wxString> m_FilteredItems;
 };
-#endif // AUTOCOMPLIST_H_
+
 

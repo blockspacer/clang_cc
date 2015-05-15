@@ -1,6 +1,4 @@
-#ifndef UTIL_H_
-#define UTIL_H_
-
+#pragma once
 #include "clangcommon.h"
 #include <string>
 #include <wx/string.h>
@@ -57,7 +55,7 @@ inline ProjectFile* GetProjectFilePair(ProjectFile* file)
     }
     return nullptr;
 }
-// c++11 style enum to prevent name clashes.
+
 enum class ImageKind
 {
     Unknown = 0,
@@ -152,4 +150,4 @@ inline int GetImageIndexForCompletionResult(const CodeCompletionResult& result, 
 
 }
 
-#endif // UTIL_H_
+

@@ -75,7 +75,6 @@
 			<Add directory="$(#wx30_64.lib)/gcc_dll$(WX_CFG)/msw$(WX_SUFFIX)" />
 			<Add directory="$(#boost.include)" />
 			<Add directory="wxjson" />
-			<Add directory="$(#cb)/plugins/compilergcc" />
 		</Compiler>
 		<Linker>
 			<Add option="-Wl,--enable-auto-image-base" />
@@ -156,6 +155,8 @@
 		<Unit filename="codelayoutnameprinter.h" />
 		<Unit filename="codelayoutview.cpp" />
 		<Unit filename="codelayoutview.h" />
+		<Unit filename="commandlinegenerator.cpp" />
+		<Unit filename="commandlinegenerator.h" />
 		<Unit filename="contextmenubuilder.h" />
 		<Unit filename="diagnosticlistview.cpp" />
 		<Unit filename="diagnosticlistview.h" />

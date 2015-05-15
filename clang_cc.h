@@ -7,8 +7,7 @@
  * License:   GPL
  **************************************************************/
 
-#ifndef CLANG_CC_H_
-#define CLANG_CC_H_
+#pragma once
 
 // For compilers that support precompilation, includes <wx/wx.h>
 #include <wx/wxprec.h>
@@ -38,7 +37,7 @@ public:
     ///Invoke configuration dialog.
     virtual int Configure();
     virtual int GetConfigurationPriority() const { return 50; }
-    virtual int GetConfigurationGroup() const { return cgUnknown; }
+    virtual int GetConfigurationGroup() const { return cgEditor; }
     virtual cbConfigurationPanel* GetConfigurationPanel(wxWindow* parent);
     virtual cbConfigurationPanel* GetProjectConfigurationPanel(wxWindow* parent, cbProject* project){ return 0; }
     // Code Completion Methods..
@@ -108,5 +107,3 @@ private:
      wxTimer  m_ReparseTimer;
      DECLARE_EVENT_TABLE()
 };
-
-#endif // CLANG_CC_H_

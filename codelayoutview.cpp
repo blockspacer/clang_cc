@@ -68,8 +68,6 @@ CodeLayoutView::~CodeLayoutView()
 {
     m_TUManager.Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
     m_TUManager.Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
-	//m_TUManager.Disconnect(ccEVT_PARSE_END, ccEventHandler(CodeLayoutView::OnParseEnd), nullptr, this);
-   // m_TUManager.Disconnect(ccEVT_REPARSE_END, ccEventHandler(CodeLayoutView::OnParseEnd), nullptr, this);
 }
 wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Decl* parent)
 {
@@ -82,7 +80,9 @@ wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Dec
     }
     if (parent->getKind() == Decl::TranslationUnit)
     {
+
        return m_TreeCtrl->AppendItem(m_TreeCtrl->GetRootItem(),name,image,image,new CodeLayoutViewItemData(node));
+
     }
     else
     {
@@ -100,14 +100,20 @@ wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Dec
            parentNode = m_TreeCtrl->AppendItem(m_TreeCtrl->GetRootItem(),parentName,GetImageIndexForDeclaration(parent),
                                                GetImageIndexForDeclaration(parent),new CodeLayoutViewItemData(parent));
        }
-       m_TreeCtrl->AppendItem(parentNode,name,image,image,new CodeLayoutViewItemData(node));
-       return parentNode;
+       wxTreeItemId item = m_TreeCtrl->AppendItem(parentNode,name,image,image,new CodeLayoutViewItemData(node));
+       m_TreeCtrl->Expand(parentNode);
+       return item;
     }
 }
 wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, wxTreeItemId parent)
 {
     int image = GetImageIndexForDeclaration(node);
-    return m_TreeCtrl->AppendItem(parent,name,image,image,new CodeLayoutViewItemData(node));
+
+    wxTreeItemId item = m_TreeCtrl->AppendItem(parent,name,image,image,new CodeLayoutViewItemData(node));
+    if (parent != m_TreeCtrl->GetRootItem())
+        m_TreeCtrl->Expand(parent);
+    return item;
+
 }
 template<typename T>
 wxTreeItemId CodeLayoutView::FindNode(const T& comparer)

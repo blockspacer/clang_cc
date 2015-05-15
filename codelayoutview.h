@@ -1,5 +1,4 @@
-#ifndef CODELAYOUTVIEW_H_
-#define CODELAYOUTVIEW_H_
+#pragma once
 
 
 #include <wx/treectrl.h>
@@ -76,4 +75,3 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // CODELAYOUTVIEW

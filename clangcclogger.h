@@ -1,5 +1,4 @@
-#ifndef CLANGCCLOGGER_H_
-#define CLANGCCLOGGER_H_
+#pragma once
 
 #include <logmanager.h>
 #include <wx/textctrl.h>
@@ -38,4 +37,4 @@ private:
     static ClangCCLogger * ptr;
 };
 
-#endif // CLANGCCLOGGER_H_
+

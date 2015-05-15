@@ -1,5 +1,4 @@
-#ifndef CODELAYOUTNAMEPRINTER_H_
-#define CODELAYOUTNAMEPRINTER_H_
+#pragma once
 
 #include <string>
 #include <sstream>
@@ -215,4 +214,4 @@ public:
             m_Out << " = default";
     }
 };
-#endif // CODELAYOUTNAMEPRINTER_H_
+

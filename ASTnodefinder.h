@@ -1,5 +1,5 @@
-#ifndef ASTNODEFINDER_H_
-#define ASTNODEFINDER_H_
+#pragma once
+
 #include <iostream>
 #include <boost/variant.hpp>
 #include "clangcommon.h"
@@ -78,4 +78,4 @@ private:
 
 };
 
-#endif // ASTNODEFINDER_H_
+

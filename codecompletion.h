@@ -1,5 +1,4 @@
-#ifndef CODECOMPLETION_H_
-#define CODECOMPLETION_H_
+#pragma once
 
 
 
@@ -68,4 +67,4 @@ private:
     CodeCompletePopupWindow* m_CcPopup;
 };
 
-#endif // CODECOMPLETION_H_
+

@@ -1,5 +1,4 @@
-#ifndef TOOLTIPEVALUATOR_H_
-#define TOOLTIPEVALUATOR_H_
+#pragma once
 #include <clang/Lex/Lexer.h>
 #include "astnodeutil.h"
 #include "stringio.h"
@@ -51,4 +50,3 @@ public:
 private:
    ASTUnit* m_Tu ;
 };
-#endif // TOOLTIPEVALUATOR_H_
