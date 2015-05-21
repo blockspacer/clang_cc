@@ -19,7 +19,7 @@ class ClangCC;
 
 
 
-typedef std::map<wxString,std::shared_ptr<clang::ASTUnit> > ParserMapType;
+
 
 enum ASTUnitMemoryUsageKind
 {
@@ -46,7 +46,7 @@ struct ASTMemoryUsage
 };
 
 using clang::ASTUnit;
-
+using ParserMapType = std::map<wxString,std::shared_ptr<clang::ASTUnit>>;
 class TranslationUnitManager:public wxEvtHandler
 {
 public:

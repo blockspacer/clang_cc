@@ -100,7 +100,7 @@ private:
      TranslationUnitManager m_TUManager;
      int m_LoggerIndex; // Index of Logger in LogManager
      int m_EditorHookId;
-
+     std::vector<ASTUnit*> m_TUsBeingParsed;
 
      /** Delay after receive editor activated event*/
      wxTimer  m_EditorActivatedTimer;

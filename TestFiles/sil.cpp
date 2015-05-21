@@ -48,4 +48,5 @@ int zoo()
     templ<int, char> coof;
     coof.foo(65);
     coof.char_val =45;
+    doof.foo(34);
 }

@@ -1,5 +1,5 @@
 
-#include "CommandLineGenerator.h"
+#include "commandlinegenerator.h"
 #include "clangcclogger.h"
 #include <compiler.h>
 #include <cbproject.h>

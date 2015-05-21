@@ -88,11 +88,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     }
 
     auto args = compileCommands[0].CommandLine;
-#ifdef CLANGCC_DEBUG_LOGGING
-    wxString commandLine = wxT("Command Line is ");
-    std::for_each(args.begin(),args.end(), [&](const std::string s){ commandLine.Append(s); commandLine.append(' '); });
-    LoggerAccess::Get()->Log(commandLine);
-#endif
+
 
     if (!Options::Get().ShouldSpellCheck())
         args.push_back("-fno-spell-checking");
@@ -100,10 +96,16 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     auto addOptions = Options::Get().GetCompilerOptions();
     args.insert(args.end(), addOptions.begin(), addOptions.end());
 
+#ifdef CLANGCC_DEBUG_LOGGING
+    wxString commandLine = wxT("Command Line is ");
+    std::for_each(args.begin(),args.end(), [&](const std::string s){ commandLine.Append(s); commandLine.append(' '); });
+    LoggerAccess::Get()->Log(commandLine);
+#endif
 
     //Parsing started event.
     ccEvent startEvent(ccEVT_PARSE_START, fileName, nullptr, file);
     AddPendingEvent(startEvent);
+
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
@@ -154,7 +156,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
     {   //File is free again
         std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
-        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
+        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file),m_FilesBeingParsed.end());
     }
     //Parsing ended event
     ccEvent endEvent(ccEVT_PARSE_END, fileName, ast, file);
@@ -238,7 +240,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
 
     {   //File is free again
         std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
-        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file));
+        m_FilesBeingParsed.erase(std::remove(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file),m_FilesBeingParsed.end());
     }
 
     ccEvent endEvent(ccEVT_REPARSE_END, fileName, tu, file);
@@ -334,7 +336,7 @@ void TranslationUnitManager::Clear()
 void TranslationUnitManager::RemoveFile(cbProject* project,const wxString& fileName)
 {
     std::lock_guard<std::mutex> lock(m_ProjectsMapMutex);
-    //Not many projects so no worries
+
     for (auto & it : m_ProjectTranslationUnits)
     {
         if(it.first == project)

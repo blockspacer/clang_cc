@@ -49,7 +49,8 @@ namespace
     int idSaveAST                   = wxNewId();
 }
 
-#define EDITOR_ACTIVATED_DELAY    300
+constexpr unsigned editorActivatedDelay = 300;
+constexpr unsigned editorModifiedDelay =  500;
 
 BEGIN_EVENT_TABLE(ClangCC, cbCodeCompletionPlugin)
     EVT_TIMER(idEditorActivatedTimer, ClangCC::OnEditorActivatedTimer)
@@ -265,7 +266,7 @@ int ClangCC::CodeComplete()
     if (!projFile)
         return -1;
     ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
-    if(!tu)
+    if(!tu || std::find(m_TUsBeingParsed.begin(),m_TUsBeingParsed.end(),tu) != m_TUsBeingParsed.end())
         return -1;
 
     cbStyledTextCtrl* control = editor->GetControl();
@@ -326,6 +327,7 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
     }
     cbStyledTextCtrl* control = editor->GetControl();
     int evtype = sciEvent.GetEventType();
+
     if(evtype == wxEVT_SCI_CHARADDED)
     {
         LoggerAccess::Get()->Log(_T("wxEvt_SCI_CHARAdded "));
@@ -352,9 +354,14 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
         {
             CodeComplete();
         }
+        int modificationType = sciEvent.GetModificationType();
+        if ( modificationType & wxSCI_MOD_INSERTTEXT ||
+             modificationType & wxSCI_MOD_DELETETEXT &&
+             !m_CCPopup->IsActive())
+        {
+            m_ReparseTimer.Start(editorModifiedDelay, wxTIMER_ONE_SHOT);
+        }
 
-//        if (chr == ' ' || chr == '\t' || chr == '\n')
-//            m_HasResult = true;
     }
     sciEvent.Skip();
 
@@ -362,7 +369,7 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
 }
 void ClangCC::OnEditorActivated(CodeBlocksEvent& event)
 {
-    m_EditorActivatedTimer.Start(EDITOR_ACTIVATED_DELAY, wxTIMER_ONE_SHOT);
+    m_EditorActivatedTimer.Start(editorActivatedDelay, wxTIMER_ONE_SHOT);
     event.Skip();
 }
 
@@ -392,7 +399,6 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
             m_View->SetActiveFile(editor->GetFilename(),tu);
         }
     }
-    LoggerAccess::Get()->Log(_("Editor activated : ") + editor->GetFilename());
 }
 void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 {
@@ -455,11 +461,11 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 }
 void ClangCC::OnParseStart(ccEvent& event)
 {
-  //TODO do something sensible
   event.Skip();
 }
 void ClangCC::OnParseEnd(ccEvent& event)
 {
+
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)
         return;
@@ -479,6 +485,7 @@ void ClangCC::OnParseEnd(ccEvent& event)
         }
 
     }
+
     event.Skip();
 }
 void ClangCC::OnReparseTimer(wxTimerEvent& event)
@@ -527,7 +534,9 @@ void ClangCC::OnGotoItemDefinition(wxCommandEvent& event)
 }
 void ClangCC::OnEditorSaveOrModified(CodeBlocksEvent& event)
 {
-
+ //   if (event.GetEditor()->GetModified())
+//        m_ReparseTimer.Start(editorModifiedDelay, wxTIMER_ONE_SHOT);
+ //   event.Skip();
 }
 
 void ClangCC::OnProjectClosed(CodeBlocksEvent& event)

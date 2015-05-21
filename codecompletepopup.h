@@ -60,7 +60,6 @@ private:
                       clang::CCP_NestedNameSpecifier};
 	cbEditor* m_Editor = nullptr;
 	cbStyledTextCtrl* m_Scintilla = nullptr;
-
 	wxImageList* m_ToolbarImages;
 	AutoCompList *m_CompleteListCtrl;
 	wxToolBar* m_FilterToolBar;
