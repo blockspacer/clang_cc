@@ -253,8 +253,10 @@ void ClangCC::OnCodeComplete(CodeBlocksEvent& event)
     //FIXME Currently we ignore the request if we are already
     //activated. That's because C::B send the Code completion request twice
     // for some reason
-    if (!m_CCPopup->IsActive())
-        CodeComplete();
+    //ignoring the requests from CCManager because it send them at ".:<>\"#/"
+    //FIXME handle Ctrl-Space
+    // (!m_CCPopup->IsActive())
+   //   CodeComplete();
 }
 int ClangCC::CodeComplete()
 {
@@ -266,8 +268,6 @@ int ClangCC::CodeComplete()
     if (!projFile)
         return -1;
     ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
-    if(!tu || std::find(m_TUsBeingParsed.begin(),m_TUsBeingParsed.end(),tu) != m_TUsBeingParsed.end())
-        return -1;
 
     cbStyledTextCtrl* control = editor->GetControl();
     std::string fileName = wx2std(editor->GetFilename());
@@ -330,7 +330,6 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
 
     if(evtype == wxEVT_SCI_CHARADDED)
     {
-        LoggerAccess::Get()->Log(_T("wxEvt_SCI_CHARAdded "));
         wxChar chr = sciEvent.GetKey();
 
         int currPos = control->GetCurrentPos();
@@ -354,14 +353,14 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
         {
             CodeComplete();
         }
-        int modificationType = sciEvent.GetModificationType();
-        if ( modificationType & wxSCI_MOD_INSERTTEXT ||
-             modificationType & wxSCI_MOD_DELETETEXT &&
-             !m_CCPopup->IsActive())
-        {
-            m_ReparseTimer.Start(editorModifiedDelay, wxTIMER_ONE_SHOT);
-        }
-
+    }
+    int modificationType = sciEvent.GetModificationType();
+    if ( modificationType & wxSCI_MOD_INSERTTEXT ||
+         modificationType & wxSCI_MOD_DELETETEXT &&
+         !m_CCPopup->IsActive())
+    {
+        //FIXME thread crashes..
+       // m_ReparseTimer.Start(editorModifiedDelay, wxTIMER_ONE_SHOT);
     }
     sciEvent.Skip();
 

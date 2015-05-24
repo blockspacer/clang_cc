@@ -88,7 +88,8 @@ void CodeCompletePopupWindow::OnKillFocus(wxFocusEvent &event)
 }
 void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
 {
-	switch (event.GetKeyCode())
+    auto keyCode = event.GetKeyCode();
+	switch (keyCode)
     {
         case WXK_UP:
             m_CompleteListCtrl->Select(std::max<int>(0,m_CompleteListCtrl->GetFirstSelected()-1));
@@ -115,13 +116,19 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
             return;
         case WXK_TAB:
         case WXK_RETURN:
-            InsertCompletionString();
+            InsertCompletionString(keyCode);
             DelayedDeactivate();
             return;
         case WXK_BACK:
         case WXK_DELETE:
-            SetFilter(GetWordAtCursor().RemoveLast());
-            break;
+            {
+                auto filter = GetWordAtCursor().RemoveLast();
+                if (filter.length() == 0)
+                    DelayedDeactivate();
+                else
+                    SetFilter(GetWordAtCursor().RemoveLast());
+                break;
+            }
         case WXK_ESCAPE:
             DelayedDeactivate();
             break;
@@ -139,7 +146,22 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
                 DelayedDeactivate();
                 break;
         default :
-            break;
+            std::string commitCharacters = Options::Get().GetMemberCommitCharacters();
+            if (commitCharacters.find(keyCode) != std::string::npos)
+            {
+                long index = m_CompleteListCtrl->GetFirstSelected();
+                if (index != wxNOT_FOUND)
+                {
+                    auto ccContextKind = m_FilteredItems[index].m_Ccc.getKind();
+                    if (ccContextKind == CodeCompletionContext::CCC_DotMemberAccess ||
+                        ccContextKind == CodeCompletionContext::CCC_ArrowMemberAccess)
+                    {
+                        InsertCompletionString(keyCode);
+                        DelayedDeactivate();
+                    }
+
+                }
+            }
 
     }
    event.Skip();
@@ -156,11 +178,8 @@ void CodeCompletePopupWindow::OnCompletionListSize(wxSizeEvent& event)
 }
 void CodeCompletePopupWindow::SetEditor(cbEditor* editor)
 {
-    if (IsActive())
-    {
-        DeActivate();
-    }
     cbAssert(editor && editor->IsOK() && "Invalid Editor");
+    DeActivate();
     m_Editor = editor;
     m_Scintilla = editor->GetControl();
 }
@@ -199,6 +218,8 @@ bool CodeCompletePopupWindow::Activate()
 }
 void CodeCompletePopupWindow::DeActivate()
 {
+    if (!IsActive())
+        return;
     m_Scintilla->Disconnect(wxEVT_KEY_DOWN,wxKeyEventHandler(CodeCompletePopupWindow::OnKeyDown),
 		nullptr, this);
 	m_Scintilla->Disconnect(wxEVT_KILL_FOCUS,wxFocusEventHandler(CodeCompletePopupWindow::OnKillFocus),
@@ -256,7 +277,7 @@ wxString CodeCompletePopupWindow::GetWordAtCursor()
 	return m_Scintilla->GetTextRange(start, end);
 }
 
-void CodeCompletePopupWindow::InsertCompletionString()
+void CodeCompletePopupWindow::InsertCompletionString(int keyCode)
 {
     long index = m_CompleteListCtrl->GetFirstSelected();
     if (index != wxNOT_FOUND)
@@ -267,8 +288,9 @@ void CodeCompletePopupWindow::InsertCompletionString()
         m_Scintilla->SetTargetEnd(pos);
         auto ccs = m_FilteredItems[index].m_Ccs;
         auto ccr = m_FilteredItems[index].m_Ccr;
-        unsigned caretPosFound = 0;
-        wxString textToInsert;
+        int placeHolderPosition = 0;
+
+        std::string textToInsert;
         for (auto& chunk : *ccs)
         {
             switch (chunk.Kind)
@@ -277,24 +299,22 @@ void CodeCompletePopupWindow::InsertCompletionString()
                 case CodeCompletionString::CK_RightParen:
                 case CodeCompletionString::CK_LeftAngle:
                 case CodeCompletionString::CK_RightAngle:
-                    if (!caretPosFound)
-                    {
-                        caretPosFound = textToInsert.Length() + 1;
-                    }
-                    textToInsert << std2wx(chunk.Text);
-                    break;
                 case CodeCompletionString::CK_TypedText:
-                    textToInsert << std2wx(chunk.Text);
+                    textToInsert += chunk.Text;
+                    break;
+                case CodeCompletionString::CK_Placeholder:
+                    if (!placeHolderPosition)
+                        placeHolderPosition = textToInsert.length();
                     break;
                 default :
                     break;
             }
         }
         m_Scintilla->ReplaceTarget(textToInsert);
-        if (caretPosFound)
-            m_Scintilla->GotoPos(start + caretPosFound);
+        if (placeHolderPosition && (keyCode == WXK_TAB || keyCode ==WXK_RETURN))
+            m_Scintilla->GotoPos(start + placeHolderPosition);
         else
-            m_Scintilla->GotoPos(start + textToInsert.Length());
+            m_Scintilla->GotoPos(start + textToInsert.length());
     }
 }
 //TODO Make sure you are gonna complete this.
@@ -365,8 +385,7 @@ void CodeCompletePopupWindow::SetItems(std::vector<CodeCompleteResultHolder> ite
 }
 void CodeCompletePopupWindow::ClearItems()
 {
-    if (IsActive())
-        DeActivate();
+    DeActivate();
     m_FilteredItems.clear();
     m_Items.clear();
 }

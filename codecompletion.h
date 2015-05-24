@@ -38,13 +38,16 @@ struct CodeCompleteResultHelper
 struct CodeCompleteResultHolder
 {
     CodeCompleteResultHolder(clang::CodeCompletionResult result,clang::CodeCompletionString* str,
+                             clang::CodeCompletionContext ctx,
                              clang::AccessSpecifier access = clang::AS_none):
         m_Ccr(result),
         m_Ccs(str),
+        m_Ccc(ctx),
         m_Access(access)
     {}
     clang::CodeCompletionResult m_Ccr;
     clang::CodeCompletionString* m_Ccs;
+    clang::CodeCompletionContext m_Ccc;
     clang::AccessSpecifier m_Access;
 };
 class EditorCodeCompleteConsumer : public clang::CodeCompleteConsumer

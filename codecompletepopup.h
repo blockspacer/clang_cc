@@ -45,7 +45,7 @@ private:
     wxString GetWordAtCursor();
     wxString GetWholeWordAtCursor();
     void CreateToolBar();
-    void InsertCompletionString();
+    void InsertCompletionString(int keyCode = -1);
 private:
     std::vector<wxString> CreateListStrings();
     template<typename RangeType>

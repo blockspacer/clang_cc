@@ -135,6 +135,7 @@ public:
     bool ShouldSkipFunctionBodies() { return m_SkipFunctionBodies; }
     bool ShouldSpellCheck() { return m_SpellCheck; }
     std::vector<std::string> GetCompilerOptions() {return m_ClangOptions;}
+    std::string GetMemberCommitCharacters() {return m_CommitCharacters;}
 
 private:
     Options();
@@ -148,6 +149,7 @@ private:
     bool m_SkipFunctionBodies;
     bool m_SpellCheck;
     std::vector<std::string> m_ClangOptions;
+    std::string m_CommitCharacters;
 
 };
 

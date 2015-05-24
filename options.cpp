@@ -3,7 +3,6 @@
 
 Options& Options::Get()
 {
-    //This is safe in C++11.
     static Options singleton;
     return singleton;
 }
@@ -32,6 +31,7 @@ void Options::Populate()
     {
         m_ClangOptions.push_back(wx2std(option));
     }
+    m_CommitCharacters = R"({}[]().,:;+-*/%&|^!=<>?@#\)";
 
 
 }

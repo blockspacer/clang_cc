@@ -74,7 +74,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
 //                                                      continue;
 //                                                    break;
 //        }
-        out.emplace_back(Results[i], ccs, access);
+        out.emplace_back(Results[i], ccs, Context, access);
     }
     m_CcPopup->SetItems(std::move(out));
 #ifdef CLANGCC_TIMING

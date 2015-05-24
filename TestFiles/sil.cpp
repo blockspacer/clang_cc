@@ -35,6 +35,14 @@ struct templ<int,char>
         char_val = sd;
         return char_val;
     }
+    char baz()
+    {
+        return 'c';
+    }
+    char baz2(int a, int b)
+    {
+        return 'd';
+    }
 };
 
 int zoo()
@@ -49,4 +57,7 @@ int zoo()
     coof.foo(65);
     coof.char_val =45;
     doof.foo(34);
+
+
+
 }
