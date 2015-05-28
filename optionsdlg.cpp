@@ -11,6 +11,7 @@ OptionsPanel::OptionsPanel(wxWindow* parent)
     wxXmlResource::Get()->LoadPanel(this, parent, _("options_panel"));
     ConfigManager* cfg = Manager::Get()->GetConfigManager(_("clang_cc"));
     //Code Completion Options
+    XRCCTRL(*this, "chk_cache_cc_results", wxCheckBox)->SetValue(cfg->ReadBool(_T("/cc_cache_cc_results"), true));
     XRCCTRL(*this, "chk_inc_macros", wxCheckBox)->SetValue(cfg->ReadBool(_T("/cc_inc_macros"), true));
     XRCCTRL(*this, "chk_inc_patterns", wxCheckBox)->SetValue(cfg->ReadBool(_T("/cc_inc_patterns"), true));
     XRCCTRL(*this, "chk_inc_keywords", wxCheckBox)->SetValue(cfg->ReadBool(_T("/cc_inc_keywords"), true));
@@ -35,6 +36,7 @@ void OptionsPanel::OnApply()
 {
     ConfigManager* cfg = Manager::Get()->GetConfigManager(_("clang_cc"));
     //Code Completion Options
+    cfg->Write(_T("/cc_cache_cc_results"), XRCCTRL(*this, "chk_cache_cc_results", wxCheckBox)->GetValue());
     cfg->Write(_T("/cc_inc_macros"), XRCCTRL(*this, "chk_inc_macros", wxCheckBox)->GetValue());
     cfg->Write(_T("/cc_inc_patterns"), XRCCTRL(*this, "chk_inc_patterns", wxCheckBox)->GetValue());
     cfg->Write(_T("/cc_inc_keywords"), XRCCTRL(*this, "chk_inc_keywords", wxCheckBox)->GetValue());

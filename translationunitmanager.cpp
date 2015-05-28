@@ -138,7 +138,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                                        true, /*CaptureDiagnostics*/
                                                        true, /*PrecompilePreamble*/
                                                        TU_Complete,
-                                                       true,/*CacheCodeCompilationResults*/
+                                                       Options::Get().ShouldCacheCompletionResults(),/*CacheCodeCompletionResults*/
                                                        true,/* Include Brief Comment*/
                                                        true  /* User Files are volatile*/
                                                        ).release();

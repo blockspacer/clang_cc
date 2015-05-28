@@ -14,10 +14,11 @@ void Options::Populate()
 {
     ConfigManager* cfg = Manager::Get()->GetConfigManager(_("clang_cc"));
     //Code Completion Options
-    m_ListedResultTypes.m_IncludeMacros = cfg->ReadBool(_T("/cc_inc_macros"), false);
-    m_ListedResultTypes.m_IncludePatterns = cfg->ReadBool(_T("/cc_inc_patterns"), false);
-    m_ListedResultTypes.m_IncludeKeywords = cfg->ReadBool(_T("/cc_inc_keywords"), false);
-    m_ListedResultTypes.m_IncludeBriefComments = cfg->ReadBool(_T("/cc_inc_comments"), false);
+    m_CacheCompletionResults = cfg->ReadBool(_T("/cc_cache_cc_results"), true);
+    m_ListedResultTypes.m_IncludeMacros = cfg->ReadBool(_T("/cc_inc_macros"), true);
+    m_ListedResultTypes.m_IncludePatterns = cfg->ReadBool(_T("/cc_inc_patterns"), true);
+    m_ListedResultTypes.m_IncludeKeywords = cfg->ReadBool(_T("/cc_inc_keywords"), true);
+    m_ListedResultTypes.m_IncludeBriefComments = cfg->ReadBool(_T("/cc_inc_comments"), true);
     //Code Complete Popup Options
     m_StringFilter = (StringFilterType) cfg->ReadInt(_T("//pop_string_filter_type"), 0);
     m_CaseInsensitiveFilter = cfg->ReadBool(_T("pop_case_insensitive_filter"), 0);

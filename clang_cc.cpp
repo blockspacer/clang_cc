@@ -286,9 +286,11 @@ int ClangCC::CodeComplete()
     CodeCompleteResultHelper helper(tu->getFileSystemOpts());
     CCListedResultTypes shownTypes = Options::Get().GetListedResultTypes();
     CodeCompleteOptions ccOpts;
+
     ccOpts.IncludeBriefComments = shownTypes.m_IncludeBriefComments;
     ccOpts.IncludeMacros = shownTypes.m_IncludeMacros;
     ccOpts.IncludeCodePatterns = shownTypes.m_IncludePatterns;
+    ccOpts.IncludeGlobals = shownTypes.m_IncludeGlobals;
 
 
     m_CCConsumer.reset(new EditorCodeCompleteConsumer(ccOpts,m_CCPopup));
@@ -330,8 +332,6 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
 
     if(evtype == wxEVT_SCI_CHARADDED)
     {
-        wxChar chr = sciEvent.GetKey();
-
         int currPos = control->GetCurrentPos();
 
         //Do nothing if string/comment/character
@@ -343,15 +343,22 @@ void ClangCC::OnEditorEvent(cbEditor* editor, wxScintillaEvent& sciEvent)
             sciEvent.Skip();
             return;
         }
-
-        wxChar prevChr = control->GetCharAt(currPos - 2);
-
-        if (chr == '.'                   ||  // after .
-            chr == '>' && prevChr == '-' || //after ->
-            chr == ':' && prevChr == ':' || //after ::
-            !m_CCPopup->IsActive() && iswalnum(chr) && iswalpha(prevChr))  // after two characters and no active completion box
+        wxChar chr = sciEvent.GetKey();
+        if (m_CCPopup->IsActive())
         {
-            CodeComplete();
+            if (Options::Get().GetMemberCommitCharacters().find(chr) != std::string::npos)
+                m_CCPopup->DeActivate();
+        }
+        else
+        {
+            wxChar prevChr = control->GetCharAt(currPos - 2);
+            if (chr == '.'                   ||  // after .
+                chr == '>' && prevChr == '-' || //after ->
+                chr == ':' && prevChr == ':' || //after ::
+                iswalnum(chr) && iswalpha(prevChr))  // after two alphanumeric characters
+            {
+                CodeComplete();
+            }
         }
     }
     int modificationType = sciEvent.GetModificationType();

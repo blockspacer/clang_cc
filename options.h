@@ -10,6 +10,7 @@ struct CCListedResultTypes
     bool m_IncludePatterns = true;
     bool m_IncludeKeywords = true;
     bool m_IncludeBriefComments = true;
+    bool m_IncludeGlobals = true;
 };
 ///
 struct ci_char_traits : public std::char_traits<char>
@@ -134,6 +135,7 @@ public:
     FilterPredicateType MakeStringFilter(const wxString& filter);
     bool ShouldSkipFunctionBodies() { return m_SkipFunctionBodies; }
     bool ShouldSpellCheck() { return m_SpellCheck; }
+    bool ShouldCacheCompletionResults() { return m_CacheCompletionResults;}
     std::vector<std::string> GetCompilerOptions() {return m_ClangOptions;}
     std::string GetMemberCommitCharacters() {return m_CommitCharacters;}
 
@@ -148,6 +150,7 @@ private:
     bool m_CaseInsensitiveFilter;
     bool m_SkipFunctionBodies;
     bool m_SpellCheck;
+    bool m_CacheCompletionResults;
     std::vector<std::string> m_ClangOptions;
     std::string m_CommitCharacters;
 
