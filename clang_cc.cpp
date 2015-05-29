@@ -471,7 +471,7 @@ void ClangCC::OnParseStart(ccEvent& event)
 }
 void ClangCC::OnParseEnd(ccEvent& event)
 {
-
+    event.Skip();
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)
         return;
@@ -492,7 +492,7 @@ void ClangCC::OnParseEnd(ccEvent& event)
 
     }
 
-    event.Skip();
+
 }
 void ClangCC::OnReparseTimer(wxTimerEvent& event)
 {
