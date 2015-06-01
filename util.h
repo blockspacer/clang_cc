@@ -7,7 +7,12 @@
 #include "projectfile.h"
 
 
-
+#if defined(CLANGCC_DEBUG_LOGGING)
+#define TRACE(format, args...) \
+    LoggerAccess::Get()->Log(F(format, ##args), Logger::info);
+#else
+    #define TRACE(format, args...)
+#endif
 #define SCI_GETTEXT 2182
 
 using namespace clang;

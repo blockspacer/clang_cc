@@ -47,7 +47,7 @@ struct ASTMemoryUsage
 
 using clang::ASTUnit;
 using ParserMapType = std::map<wxString,std::shared_ptr<clang::ASTUnit>>;
-class TranslationUnitManager:public wxEvtHandler
+class TranslationUnitManager:public wxEvtHandler , wxThread
 {
 public:
     TranslationUnitManager(ClangCC& CC);

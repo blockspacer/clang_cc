@@ -471,6 +471,7 @@ void ClangCC::OnParseStart(ccEvent& event)
 }
 void ClangCC::OnParseEnd(ccEvent& event)
 {
+    TRACE(wxT("Parse End received in ClangCC::OnParseEnd"));
     event.Skip();
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)

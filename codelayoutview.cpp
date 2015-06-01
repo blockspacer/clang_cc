@@ -41,7 +41,7 @@ END_EVENT_TABLE()
 
 using namespace clang;
 CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
-    m_TUManager(tm)
+    wxPanel(parent), m_TUManager(tm)
 {
 	//Initialize(LayoutView)
 	wxBoxSizer* BoxSizer1;
@@ -59,15 +59,15 @@ CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
 	m_TreeCtrl->AddRoot(_T("root"));
 	//Setup events
 
-	m_TUManager.Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
-	m_TUManager.Bind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
+	GetParent()->Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+	GetParent()->Bind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 
 }
 
 CodeLayoutView::~CodeLayoutView()
 {
-    m_TUManager.Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
-    m_TUManager.Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
+    GetParent()->Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+    GetParent()->Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 }
 wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Decl* parent)
 {
@@ -251,6 +251,7 @@ void CodeLayoutView::OnSelectInEditor(wxCommandEvent& event)
 }
 void CodeLayoutView::OnParseEnd(ccEvent& event)
 {
+    TRACE(wxT("Parse End received in CodeLayouView::OnParseEend"));
     cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
     ASTUnit* tu = event.GetTranslationUnit();
     if (!editor || !tu)
