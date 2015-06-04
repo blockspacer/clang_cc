@@ -364,3 +364,6 @@ void TranslationUnitManager::OnProjectOpened(CodeBlocksEvent& event)
 
 }
 
+void* TranslationUnitManager::Entry()
+{
+}

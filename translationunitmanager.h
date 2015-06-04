@@ -47,7 +47,7 @@ struct ASTMemoryUsage
 
 using clang::ASTUnit;
 using ParserMapType = std::map<wxString,std::shared_ptr<clang::ASTUnit>>;
-class TranslationUnitManager:public wxEvtHandler , wxThread
+class TranslationUnitManager:public wxEvtHandler , public wxThreadHelper
 {
 public:
     TranslationUnitManager(ClangCC& CC);
@@ -64,6 +64,8 @@ public:
     void RemoveFile(cbProject* project,const wxString& fileName);
     void OnProjectOpened(CodeBlocksEvent& event);
     void Clear();
+private:
+    void* Entry() override;
 private:
     std::map<cbProject*,ParserMapType> m_ProjectTranslationUnits;
     std::vector<ProjectFile*> m_FilesBeingParsed;
