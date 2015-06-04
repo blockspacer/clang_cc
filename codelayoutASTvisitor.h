@@ -187,7 +187,7 @@ public:
 	}
 	bool VisitTranslationUnitDecl(clang::TranslationUnitDecl* decl)
 	{
-	    m_ParentStack.push(m_View.AddNode(_T(""),decl, nullptr));
+	    m_ParentStack.push(m_View.AddNode("",decl, nullptr));
 	    return true;
 	}
 private:

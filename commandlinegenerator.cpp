@@ -8,12 +8,12 @@
 #include <wx/arrstr.h>
 #include <wx/hashmap.h>
 
-#define COMPILER_SIMPLE_LOG     _T("SLOG:")
-#define COMPILER_NOTE_LOG       _T("SLOG:NLOG:")
-#define COMPILER_WARNING_LOG    _T("SLOG:WLOG:")
-#define COMPILER_TARGET_CHANGE  _T("TGT:")
-#define COMPILER_WAIT           _T("WAIT")
-#define COMPILER_WAIT_LINK      _T("LINK")
+#define COMPILER_SIMPLE_LOG     "SLOG:"
+#define COMPILER_NOTE_LOG       "SLOG:NLOG:"
+#define COMPILER_WARNING_LOG    "SLOG:WLOG:"
+#define COMPILER_TARGET_CHANGE  "TGT:"
+#define COMPILER_WAIT           "WAIT"
+#define COMPILER_WAIT_LINK      "LINK"
 
 CommandLineGenerator::CommandLineGenerator(Compiler* compiler,
                                            cbProject* project):
@@ -33,7 +33,7 @@ wxArrayString CommandLineGenerator::GetCompileFileCommand(ProjectBuildTarget* ta
 
     if (pf->compilerVar.IsEmpty())
     {
-        LoggerAccess::Get()->Log(_("Cannot resolve compiler var for project file."));
+        LoggerAccess::Get()->Log("Cannot resolve compiler var for project file.");
         return ret;
     }
 
@@ -42,7 +42,7 @@ wxArrayString CommandLineGenerator::GetCompileFileCommand(ProjectBuildTarget* ta
                        : m_Compiler;
     if (!compiler)
     {
-        Manager::Get()->GetLogManager()->DebugLog(_("Can't access compiler for file."));
+        Manager::Get()->GetLogManager()->DebugLog("Can't access compiler for file.");
         return ret;
     }
 
@@ -103,7 +103,7 @@ wxArrayString CommandLineGenerator::GetCompileFileCommand(ProjectBuildTarget* ta
     if (!is_header && compiler_cmd.IsEmpty())
     {
         ret.Add(  wxString(COMPILER_SIMPLE_LOG)
-                + _("Skipping file (no compiler program set): ")
+                + "Skipping file (no compiler program set): "
                 + pfd.source_file_native );
         return ret;
     }
@@ -131,7 +131,7 @@ wxArrayString CommandLineGenerator::GetCompileFileCommand(ProjectBuildTarget* ta
                             : pfd.object_file_absolute_native;
 
         if ( !wxRemoveFile(object_abs) )
-            LoggerAccess::Get()->Log(_("Cannot remove old PCH file:\n") + object_abs);
+            LoggerAccess::Get()->Log("Cannot remove old PCH file:\n" + object_abs);
     }
 
     return ret;
@@ -141,7 +141,7 @@ void CommandLineGenerator::AddCommandsToArray(const wxString& cmds, wxArrayStrin
     wxString cmd = cmds;
     while (!cmd.IsEmpty())
     {
-        int idx = cmd.Find(_T("\n"));
+        int idx = cmd.Find("\n");
         wxString cmdpart = idx != -1 ? cmd.Left(idx) : cmd;
         cmdpart.Trim(false);
         cmdpart.Trim(true);

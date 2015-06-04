@@ -40,7 +40,7 @@ CodeCompletePopupWindow::CodeCompletePopupWindow(wxWindow* parent):
     wxPopupWindow(parent)
 {
 	m_ToolbarImages = new wxImageList(16,16,true,0);
-	m_ToolbarImages->Add(wxXmlResource::Get()->LoadBitmap(_("browser_images")));
+	m_ToolbarImages->Add(wxXmlResource::Get()->LoadBitmap("browser_images"));
 
 	//CreateToolBar();
 
@@ -322,15 +322,15 @@ void CodeCompletePopupWindow::CreateToolBar()
 {
 	m_FilterPopup = new wxPopupWindow(this);
 	m_FilterToolBar = new wxToolBar(m_FilterPopup, wxID_ANY, wxDefaultPosition, wxDefaultSize,wxTB_FLAT);
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(0));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(3));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(5));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(8));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(11));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(13));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(15));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(18));
-	m_FilterToolBar->AddTool(wxID_ANY,_("Label"),m_ToolbarImages->GetBitmap(21));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(0));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(3));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(5));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(8));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(11));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(13));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(15));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(18));
+	m_FilterToolBar->AddTool(wxID_ANY,"Label",m_ToolbarImages->GetBitmap(21));
 	m_FilterToolBar->Realize();
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_FilterToolBar,0);
@@ -412,11 +412,11 @@ std::vector<wxString> CodeCompletePopupWindow::CreateListStrings(const RangeType
                     itemText << std2wx(chunk.Text);
             }
         }
-        itemText << _T(":p") << p.m_Ccr.Priority;
+        itemText << ":p" << p.m_Ccr.Priority;
         out.push_back(std::move(itemText));
     }
 #ifdef CLANGCC_TIMING
-    LoggerAccess::Get()->Log(wxString::Format(_("CreateListStrings completed in %ldms"), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format("CreateListStrings completed in %ldms", watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     return out;
 }

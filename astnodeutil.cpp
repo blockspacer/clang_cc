@@ -42,7 +42,7 @@ const Decl* GetDeclarationFromType(const QualType& type)
 {
     if (type.isNull())
     {
-        LoggerAccess::Get()->Log(_T("null qual type in GetDeclarationFrom type"));
+        LoggerAccess::Get()->Log("null qual type in GetDeclarationFrom type");
         return nullptr;
     }
 

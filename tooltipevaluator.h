@@ -34,7 +34,7 @@ public:
     }
     wxString operator()(const boost::blank&)
     {
-        return _T("");
+        return "";
     }
     wxString operator()(const TypeLoc& tloc)
     {

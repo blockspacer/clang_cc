@@ -35,7 +35,7 @@
 // We are using an anonymous namespace so we don't litter the global one.
 namespace
 {
-    PluginRegistrant<ClangCC> reg(_T("clang_cc"));
+    PluginRegistrant<ClangCC> reg("clang_cc");
 }
 
 int idEditorGotoDeclaration = wxNewId();
@@ -75,9 +75,9 @@ ClangCC::ClangCC():
     // Make sure our resources are available.
     // In the generated boilerplate code we have no resources but when
     // we add some, it will be nice that this code is in place already ;)
-    if (!Manager::LoadResource(_T("clang_cc.zip")))
+    if (!Manager::LoadResource("clang_cc.zip"))
     {
-        NotifyMissingFile(_T("clang_cc.zip"));
+        NotifyMissingFile("clang_cc.zip");
     }
 }
 
@@ -89,7 +89,7 @@ void ClangCC::OnAttach()
 {
     m_View = new CodeLayoutView(m_Mgr->GetAppWindow(), m_TUManager);
     m_CCPopup = new CodeCompletePopupWindow(m_Mgr->GetAppWindow());
-    m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, _("Clang_cc"));
+    m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, "Clang_cc");
 
     //Setup logs.
 
@@ -97,7 +97,7 @@ void ClangCC::OnAttach()
 
     LogManager* logMgr = m_Mgr->GetLogManager();
     m_LoggerIndex = logMgr->SetLog(LoggerAccess::Get());
-    logMgr->Slot(m_LoggerIndex).title = _("Clang_CC Log");
+    logMgr->Slot(m_LoggerIndex).title = "Clang_CC Log";
 
     CodeBlocksLogEvent evt(cbEVT_ADD_LOG_WINDOW, m_LoggerIndex, logMgr->Slot(m_LoggerIndex).title, logMgr->Slot(m_LoggerIndex).icon);
     Manager::Get()->ProcessEvent(evt);
@@ -154,7 +154,7 @@ void ClangCC::OnRelease(bool appShutDown)
 int ClangCC::Configure()
 {
     //create and display the configuration dialog for your plugin
-    cbConfigurationDialog dlg(Manager::Get()->GetAppWindow(), wxID_ANY, _("Your dialog title"));
+    cbConfigurationDialog dlg(Manager::Get()->GetAppWindow(), wxID_ANY, "Your dialog title");
     cbConfigurationPanel* panel = GetConfigurationPanel(&dlg);
     if (panel)
     {
@@ -167,12 +167,12 @@ int ClangCC::Configure()
 
 void ClangCC::BuildMenu(wxMenuBar* menuBar)
 {
-    int index = menuBar->FindMenu(_("P&lugins"));
+    int index = menuBar->FindMenu("P&lugins");
     wxMenu* clangCCMenu = new wxMenu();
-    clangCCMenu->Append(idReparseFile,_("Reparse File"));
-    clangCCMenu->Append(idMemoryUsage,_("Show Memory Usage"));
-    clangCCMenu->Append(idSaveAST, _("Save AST File"));
-    menuBar->Insert(index + 1, clangCCMenu,_("&Clang_CC"));
+    clangCCMenu->Append(idReparseFile,"Reparse File");
+    clangCCMenu->Append(idMemoryUsage,"Show Memory Usage");
+    clangCCMenu->Append(idSaveAST, "Save AST File");
+    menuBar->Insert(index + 1, clangCCMenu,"&Clang_CC");
 }
 void ClangCC::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
 {
@@ -230,9 +230,9 @@ void ClangCC::OnSaveAST(wxCommandEvent& event)
 
         wxString projectPath = project->GetBasePath();
         wxFileName path(projectPath);
-        path.AppendDir(_T(".clang_ast"));
+        path.AppendDir(".clang_ast");
         path.Mkdir();
-        wxString fileName = projFile->file.GetFullName() + _T(".ast");
+        wxString fileName = projFile->file.GetFullName() + ".ast";
         std::string refPath = wx2std(path.GetPath(wxPATH_GET_SEPARATOR) + fileName);
         tu->Save(refPath);
     }
@@ -276,7 +276,7 @@ int ClangCC::CodeComplete()
     int wordStartPos = control->WordStartPosition(pos,true);
     int column = control->GetColumn(wordStartPos) + 1;
     wxString logstring;
-    logstring << _("Code Complete at : ") <<editor->GetShortName() << _(":")<< line <<_(":")<<column;
+    logstring << "Code Complete at : "<<editor->GetShortName() << ":"<< line <<":"<<column;
     LoggerAccess::Get()->Log(logstring);
     int length = control->GetTextLength();
     llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName).release();
@@ -309,7 +309,7 @@ int ClangCC::CodeComplete()
                      *helper.m_FileMgr,helper.m_StoredDiags,helper.m_OwnedBuffers
                      );
 #ifdef CLANGCC_TIMING
-    LoggerAccess::Get()->Log(wxString::Format(_("tu->CodeComplete executed in %ldms"), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format("tu->CodeComplete executed in %ldms", watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     /// Deactivates the current popup
     m_CCPopup->SetEditor(editor);
@@ -456,7 +456,7 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
             toolTip = boost::apply_visitor(ttEval, node);
         }
         else
-            toolTip = _T("The file is still being parsed.");
+            toolTip = "The file is still being parsed.";
 
         if (!toolTip.empty())
         {
@@ -471,7 +471,7 @@ void ClangCC::OnParseStart(ccEvent& event)
 }
 void ClangCC::OnParseEnd(ccEvent& event)
 {
-    TRACE(wxT("Parse End received in ClangCC::OnParseEnd"));
+    TRACE(L"Parse End received in ClangCC::OnParseEnd");
     event.Skip();
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)

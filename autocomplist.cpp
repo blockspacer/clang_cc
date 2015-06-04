@@ -13,10 +13,10 @@
 AutoCompList::AutoCompList(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style):
 	wxListView(parent,id,pos,size,style)
 {
-	InsertColumn(0, _("TypedText"));
+	InsertColumn(0, "TypedText");
     wxImageList* imglist = new wxImageList(16,16,true,0);
     SetBackgroundColour(*wxGREEN);
-	imglist->Add(wxXmlResource::Get()->LoadBitmap(_("browser_images")));
+	imglist->Add(wxXmlResource::Get()->LoadBitmap("browser_images"));
 	AssignImageList(imglist, wxIMAGE_LIST_SMALL);
 }
 
@@ -36,7 +36,7 @@ void AutoCompList::SetItems(std::vector<wxString> items)
    m_FilteredItems = items;
 
    SetItemCount(m_FilteredItems.size());
-   LoggerAccess::Get()->Log(wxString::Format(_("%u items for CodeCompleteList."),m_FilteredItems.size()));
+   LoggerAccess::Get()->Log(wxString::Format("%u items for CodeCompleteList.",m_FilteredItems.size()));
    DoLayout();
    if (!m_FilteredItems.empty())
    {

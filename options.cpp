@@ -12,21 +12,21 @@ Options::Options()
 }
 void Options::Populate()
 {
-    ConfigManager* cfg = Manager::Get()->GetConfigManager(_("clang_cc"));
+    ConfigManager* cfg = Manager::Get()->GetConfigManager("clang_cc");
     //Code Completion Options
-    m_CacheCompletionResults = cfg->ReadBool(_T("/cc_cache_cc_results"), true);
-    m_ListedResultTypes.m_IncludeMacros = cfg->ReadBool(_T("/cc_inc_macros"), true);
-    m_ListedResultTypes.m_IncludePatterns = cfg->ReadBool(_T("/cc_inc_patterns"), true);
-    m_ListedResultTypes.m_IncludeKeywords = cfg->ReadBool(_T("/cc_inc_keywords"), true);
-    m_ListedResultTypes.m_IncludeBriefComments = cfg->ReadBool(_T("/cc_inc_comments"), true);
+    m_CacheCompletionResults = cfg->ReadBool("/cc_cache_cc_results", true);
+    m_ListedResultTypes.m_IncludeMacros = cfg->ReadBool("/cc_inc_macros", true);
+    m_ListedResultTypes.m_IncludePatterns = cfg->ReadBool("/cc_inc_patterns", true);
+    m_ListedResultTypes.m_IncludeKeywords = cfg->ReadBool("/cc_inc_keywords", true);
+    m_ListedResultTypes.m_IncludeBriefComments = cfg->ReadBool("/cc_inc_comments", true);
     //Code Complete Popup Options
-    m_StringFilter = (StringFilterType) cfg->ReadInt(_T("/pop_string_filter_type"), 0);
-    m_CaseInsensitiveFilter = cfg->ReadBool(_T("/pop_case_insensitive_filter"), 0);
+    m_StringFilter = (StringFilterType) cfg->ReadInt("/pop_string_filter_type", 0);
+    m_CaseInsensitiveFilter = cfg->ReadBool("/pop_case_insensitive_filter", 0);
     //Translation Unit Options
-    m_SkipFunctionBodies = cfg->ReadBool(_T("/tu_skip_function_bodies"));
-    m_SpellCheck = cfg->ReadBool(_T("/tu_spell_check"));
+    m_SkipFunctionBodies = cfg->ReadBool("/tu_skip_function_bodies");
+    m_SpellCheck = cfg->ReadBool("/tu_spell_check");
     wxArrayString clangOptions;
-    cfg->Read(_T("/tu_clang_options"), &clangOptions);
+    cfg->Read("/tu_clang_options", &clangOptions);
     m_ClangOptions.clear();
     for (const auto& option : clangOptions)
     {

@@ -77,13 +77,13 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
     if(iter == m_CompilationDatabases.end())
     {
-        LoggerAccess::Get()->Log(wxT("Could not find the compilation database for project : ") + project->GetTitle());
+        LoggerAccess::Get()->Log("Could not find the compilation database for project : " + project->GetTitle());
         return nullptr;
     }
     auto compileCommands = iter->second->getCompileCommands(wx2std(file->file.GetFullPath()));
     if (compileCommands.empty())
     {
-        LoggerAccess::Get()->Log(wxT("No compile commands for the file") + file->file.GetName());
+        LoggerAccess::Get()->Log("No compile commands for the file" + file->file.GetName());
         return nullptr;
     }
 
@@ -97,7 +97,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     args.insert(args.end(), addOptions.begin(), addOptions.end());
 
 #ifdef CLANGCC_DEBUG_LOGGING
-    wxString commandLine = wxT("Command Line is ");
+    wxString commandLine = "Command Line is ";
     std::for_each(args.begin(),args.end(), [&](const std::string s){ commandLine.Append(s); commandLine.append(' '); });
     LoggerAccess::Get()->Log(commandLine);
 #endif
@@ -144,10 +144,10 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                                        ).release();
 
 #ifdef CLANGCC_TIMING
-    LoggerAccess::Get()->Log(wxString::Format(_("Parsing %s completed in %ldms"), file->file.GetFullName().c_str(), watch.Time()),Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format("Parsing %s completed in %ldms", file->file.GetFullName().c_str(), watch.Time()),Logger::info);
 #endif // CLANGCC_TIMING
     if (!ast)
-      LoggerAccess::Get()->Log(_("\t Cannot Create ASTUnit for ") + file->file.GetFullName());
+      LoggerAccess::Get()->Log("\t Cannot Create ASTUnit for " + file->file.GetFullName());
     if (ast)
     {
         if (allowAdd)
@@ -232,10 +232,10 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
         tu = ParseProjectFile(file);
 
     if (!tu || tu->Reparse(remappedFiles))
-         LoggerAccess::Get()->Log(_("\t Reparsing Failed : ")+ file->file.GetFullName());
+         LoggerAccess::Get()->Log("\t Reparsing Failed : "+ file->file.GetFullName());
 
 #ifdef CLANGCC_TIMING
-    LoggerAccess::Get()->Log(wxString::Format(_("Reparsing completed in %ldms"), watch.Time()), Logger::info);
+    LoggerAccess::Get()->Log(wxString::Format("Reparsing completed in %ldms", watch.Time()), Logger::info);
 #endif // CLANGCC_TIMING
 
     {   //File is free again

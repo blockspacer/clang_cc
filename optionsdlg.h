@@ -7,8 +7,8 @@ class OptionsPanel: public cbConfigurationPanel
 public:
     OptionsPanel(wxWindow* parent);
     ~OptionsPanel();
-    virtual wxString GetTitle() const          { return _("Clang CC"); }
-    virtual wxString GetBitmapBaseName() const { return _("clang_cc"); }
+    virtual wxString GetTitle() const          { return "Clang CC"; }
+    virtual wxString GetBitmapBaseName() const { return "clang_cc"; }
     virtual void OnApply();
     virtual void OnCancel();
 private:

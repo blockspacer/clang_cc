@@ -46,17 +46,17 @@ CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
 	//Initialize(LayoutView)
 	wxBoxSizer* BoxSizer1;
 
-	Create(parent, wxID_ANY, wxDefaultPosition, wxSize(284,296), wxTAB_TRAVERSAL, _T("wxID_ANY"));
+	Create(parent, wxID_ANY, wxDefaultPosition, wxSize(284,296), wxTAB_TRAVERSAL, "wxID_ANY");
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-	m_TreeCtrl = new wxTreeCtrl(this, ID_TREECTRL1, wxDefaultPosition, wxSize(273,283), wxTR_HIDE_ROOT|wxTR_DEFAULT_STYLE, wxDefaultValidator, _T("ID_TREECTRL1"));
+	m_TreeCtrl = new wxTreeCtrl(this, ID_TREECTRL1, wxDefaultPosition, wxSize(273,283), wxTR_HIDE_ROOT|wxTR_DEFAULT_STYLE, wxDefaultValidator, "ID_TREECTRL1");
 	BoxSizer1->Add(m_TreeCtrl, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	SetSizer(BoxSizer1);
 	Layout();
 	//
 	wxImageList* imglist = new wxImageList(16,16,true,0);
-	imglist->Add(wxXmlResource::Get()->LoadBitmap(_("browser_images")));
+	imglist->Add(wxXmlResource::Get()->LoadBitmap("browser_images"));
 	m_TreeCtrl->SetImageList(imglist);
-	m_TreeCtrl->AddRoot(_T("root"));
+	m_TreeCtrl->AddRoot("root");
 	//Setup events
 
 	GetParent()->Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
@@ -96,7 +96,7 @@ wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Dec
            printer.Visit(parent);
            wxString parentName = out.str();
            //wxString parentName= wxString::FromAscii(parent->getDeclKindName());
-           //parentName += _("-Bad Parent");
+           //parentName += "-Bad Parent";
            parentNode = m_TreeCtrl->AppendItem(m_TreeCtrl->GetRootItem(),parentName,GetImageIndexForDeclaration(parent),
                                                GetImageIndexForDeclaration(parent),new CodeLayoutViewItemData(parent));
        }
@@ -195,13 +195,13 @@ void CodeLayoutView::ShowContextMenu(wxTreeCtrl* tree, wxTreeItemId item)
     Decl* decl = itemData->m_Data;
     if (item.IsOk() && decl)
     {
-        menu->Append(idCodeLayoutViewGoto, _T("Goto"));
-        menu->Append(idCodeLayoutViewSelectInEditor, _T("Select in Editor"));
+        menu->Append(idCodeLayoutViewGoto, "Goto");
+        menu->Append(idCodeLayoutViewSelectInEditor, "Select in Editor");
         const Decl* definition= ASTNode::GetDefinition(decl);
         if(definition && definition != decl)
-            menu->Append(idCodeLayoutViewGotoDefinition, _T("Goto Definition"));
+            menu->Append(idCodeLayoutViewGotoDefinition, "Goto Definition");
         else if(decl->getPreviousDecl())
-            menu->Append(idCodeLayoutViewGotoDeclaration, _("Goto Declaration"));
+            menu->Append(idCodeLayoutViewGotoDeclaration, "Goto Declaration");
 
     }
     if (menu->GetMenuItemCount())
@@ -251,7 +251,7 @@ void CodeLayoutView::OnSelectInEditor(wxCommandEvent& event)
 }
 void CodeLayoutView::OnParseEnd(ccEvent& event)
 {
-    TRACE(wxT("Parse End received in CodeLayouView::OnParseEend"));
+    TRACE(L"Parse End received in CodeLayouView::OnParseEend");
     cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
     ASTUnit* tu = event.GetTranslationUnit();
     if (!editor || !tu)

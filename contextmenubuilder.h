@@ -25,10 +25,10 @@ public:
         std::string log = "DeclKindName : ";
         log += decl->getDeclKindName();
         LoggerAccess::Get()->Log(std2wx(log));
-        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+        m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
         if(const Decl* definition = ASTNode::GetDefinition(decl))
             if (definition != decl)
-                 m_Menu->Append(idEditorGotoDeclaration, _T("Goto Definition"));
+                 m_Menu->Append(idEditorGotoDeclaration, "Goto Definition");
 
     }
     void operator()(const Stmt* stmt)
@@ -37,7 +37,7 @@ public:
         log += stmt->getStmtClassName();
         LoggerAccess::Get()->Log(std2wx(log));
         if (ASTNode::GetDeclarationFromStatement(stmt))
-            m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
 
     }
     void operator()(const boost::blank&)
@@ -60,7 +60,7 @@ public:
     void operator()(const RefNode& refNode)
     {
        std::string log = "RefNode : ";
-       m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+       m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
        LoggerAccess::Get()->Log(std2wx(log));
     }
     void VisitStmt(Stmt* node) const
@@ -69,18 +69,18 @@ public:
     }
     void VisitDecl(Decl* node) const
     {
-        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+        m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
     }
     void VisitFunctionDecl(FunctionDecl* decl)
     {
         if (decl->isThisDeclarationADefinition() &&
             decl->getPreviousDecl())
         {
-            m_Menu->Append(idCodeLayoutViewGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idCodeLayoutViewGotoDeclaration, "Goto Declaration");
         }
         if (decl->hasBody() && !decl->isThisDeclarationADefinition())
         {
-            m_Menu->Append(idCodeLayoutViewGotoDefinition, _T("Goto Definition"));
+            m_Menu->Append(idCodeLayoutViewGotoDefinition, "Goto Definition");
         }
     }
     void VisitTagDecl(TagDecl* decl)
@@ -88,11 +88,11 @@ public:
         if (decl->isThisDeclarationADefinition() &&
             decl->getPreviousDecl())
         {
-            m_Menu->Append(idCodeLayoutViewGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idCodeLayoutViewGotoDeclaration, "Goto Declaration");
         }
         if (decl->getDefinition() && !decl->isThisDeclarationADefinition())
         {
-            m_Menu->Append(idCodeLayoutViewGotoDefinition, _T("Goto Definition"));
+            m_Menu->Append(idCodeLayoutViewGotoDefinition, "Goto Definition");
         }
     }
     void VisitDeclRefExpr(DeclRefExpr* expr)
@@ -103,16 +103,16 @@ public:
             decl = expr->getFoundDecl();
         }
         if(decl)
-            m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+            m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
     }
     void VisitMemberExpr(MemberExpr* expr)
     {
-        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+        m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
     }
     void VisitTagTypeLoc(TagTypeLoc tloc)
     {
         Decl*  decl= tloc.getDecl();
-        m_Menu->Append(idEditorGotoDeclaration, _T("Goto Declaration"));
+        m_Menu->Append(idEditorGotoDeclaration, "Goto Declaration");
     }
 private:
     wxMenu* m_Menu;
