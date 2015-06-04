@@ -27,7 +27,7 @@ const Decl* GetDeclaration(const NodeType& node)
             return GetDeclarationFromRefNode(boost::get<RefNode>(node));
     }
 }
-//Add as necessary.
+//Todo Add as necessary.
 const Decl* GetDeclarationFromStatement(const Stmt* stmt)
 {
     if (const DeclRefExpr* expr = dyn_cast<DeclRefExpr>(stmt))

@@ -408,6 +408,7 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
 }
 void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 {
+    event.Skip();
     cbEditor* editor = m_Mgr->GetEditorManager()->GetBuiltinActiveEditor();
     if (!editor)
         return;
@@ -418,7 +419,7 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
         int pos = control->PositionFromPointClose(event.GetX(), event.GetY());
         if (pos == wxSCI_INVALID_POSITION)
         {
-            event.Skip();
+
             return;
         }
         ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);

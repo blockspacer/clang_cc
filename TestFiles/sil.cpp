@@ -59,5 +59,8 @@ int zoo()
     doof.foo(34);
 
 
+    return 0;
+
+
 
 }
