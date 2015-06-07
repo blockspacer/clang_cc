@@ -22,8 +22,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
 #ifdef CLANGCC_TIMING
     wxStopWatch watch;
 #endif // CLANGCC_TIMING
-//    std::stable_sort(Results, Results + NumResults); //Sort By name
-//    LoggerAccess::Get()->Log(wxString::Format("ProcessCodeCompleteResults Sort by name executed in %ldms", watch.Time()),Logger::info);
+
     std::vector<CodeCompleteResultHolder> out;
     switch(m_SortType)
     {

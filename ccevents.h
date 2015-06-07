@@ -30,10 +30,9 @@ public:
     ccEvent(const ccEvent& event):
         wxEvent(event),
         m_Tu(event.m_Tu),
-        m_ProjectFile(event.m_ProjectFile)
-    {
-        SetFilename(event.m_Filename.c_str());
-    }
+        m_ProjectFile(event.m_ProjectFile),
+        m_Filename(event.m_Filename)
+    {}
 
     wxEvent* Clone() const override
     {
@@ -61,21 +60,4 @@ wxDECLARE_EVENT(ccEVT_PARSE_START,ccEvent);
 wxDECLARE_EVENT(ccEVT_PARSE_END,ccEvent);
 wxDECLARE_EVENT(ccEVT_REPARSE_START,ccEvent);
 wxDECLARE_EVENT(ccEVT_REPARSE_END,ccEvent);
-//extern const wxEventType ccEVT_PARSE_START;
-//extern const wxEventType ccEVT_PARSE_END;
-//extern const wxEventType ccEVT_REPARSE_START;
-//extern const wxEventType ccEVT_REPARSE_END;
-
-//typedef void (wxEvtHandler::*ccEventFunction)(ccEvent&);
-
-
-//#define ccEventHandler(func)  \
-//	(wxObjectEventFunction)(wxEventFunction) \
-//	wxStaticCastEvent(ccEventFunction, &func)
-//
-//#define EVT_PARSE(event,func)  wx__DECLARE_EVT0(event, ccEventHandler(func))
-//#define EVT_PARSE_END(func)  wx__DECLARE_EVT0(ccEVT_PARSE_END, ccEventHandler(func))
-//#define EVT_REPARSE_START(func)  wx__DECLARE_EVT0(ccEVT_REPARSE_START, ccEventHandler(func))
-//#define EVT_REPARSE_END(func)  wx__DECLARE_EVT0(ccEVT_REPARSE_END, ccEventHandler(func))
-//
 

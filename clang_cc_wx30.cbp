@@ -175,6 +175,7 @@
 		<Unit filename="stringio.cpp" />
 		<Unit filename="stringio.h" />
 		<Unit filename="tooltipevaluator.h" />
+		<Unit filename="tooltippopup.h" />
 		<Unit filename="translationunitmanager.cpp" />
 		<Unit filename="translationunitmanager.h" />
 		<Unit filename="util.h">
