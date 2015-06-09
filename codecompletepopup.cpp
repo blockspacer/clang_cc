@@ -30,7 +30,7 @@
 using namespace clang;
 static int  idAutoCompList = wxNewId();
 
-constexpr int CodeCompletePopupWindow::m_PriorityArray[3];
+
 BEGIN_EVENT_TABLE(CodeCompletePopupWindow, wxPopupWindow)
 	EVT_LIST_ITEM_ACTIVATED(idAutoCompList, CodeCompletePopupWindow::OnItemActivated)
 	EVT_LIST_ITEM_SELECTED(idAutoCompList, CodeCompletePopupWindow::OnItemSelected)

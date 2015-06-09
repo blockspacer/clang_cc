@@ -2,11 +2,11 @@
 
 ToolTipPopupWindow::ToolTipPopupWindow()
 {
-    m_panel = new wxPanel (this,wxID_ANY);
+    m_Panel = new wxPanel (this,wxID_ANY);
 
 }
-void ToolTipPopupWindow::SetTooltip(wxString tooltip)
+void ToolTipPopupWindow::SetText(wxString tooltip)
 {
-    m_TooltipText->
+    //m_TooltipText->
 }
 

@@ -1,12 +1,14 @@
 #pragma once
+#include <wx/wx.h>
 #include <wx/popupwin.h>
 
-class TooltipPopupWindow : public wxPopupWindow
+class ToolTipPopupWindow : public wxPopupWindow
 {
 public:
-    void SetText(wxString text)
+    ToolTipPopupWindow();
+    void SetText(wxString text);
 private:
     wxStaticText* m_TooltipText;
     wxPanel* m_Panel;
-}
+};
 
