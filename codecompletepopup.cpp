@@ -28,13 +28,8 @@
 
 
 using namespace clang;
-static int  idAutoCompList = wxNewId();
 
-
-BEGIN_EVENT_TABLE(CodeCompletePopupWindow, wxPopupWindow)
-	EVT_LIST_ITEM_ACTIVATED(idAutoCompList, CodeCompletePopupWindow::OnItemActivated)
-	EVT_LIST_ITEM_SELECTED(idAutoCompList, CodeCompletePopupWindow::OnItemSelected)
-END_EVENT_TABLE()
+constexpr int CodeCompletePopupWindow::m_PriorityArray[3];
 
 CodeCompletePopupWindow::CodeCompletePopupWindow(wxWindow* parent):
     wxPopupWindow(parent)
@@ -44,11 +39,13 @@ CodeCompletePopupWindow::CodeCompletePopupWindow(wxWindow* parent):
 
 	//CreateToolBar();
 
-	m_CompleteListCtrl = new AutoCompList(this,idAutoCompList);
+	m_CompleteListCtrl = new AutoCompList(this);
 
 
     m_CompleteListCtrl->Bind(wxEVT_ENTER_WINDOW,&CodeCompletePopupWindow::OnCompletionListMouseOver,this);
     m_CompleteListCtrl->Bind(wxEVT_SIZE,&CodeCompletePopupWindow::OnCompletionListSize,this);
+    m_CompleteListCtrl->Bind(wxEVT_LIST_ITEM_ACTIVATED, &CodeCompletePopupWindow::OnItemActivated, this);
+    m_CompleteListCtrl->Bind(wxEVT_LIST_ITEM_SELECTED, &CodeCompletePopupWindow::OnItemSelected, this);
 
 	wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
 	topSizer->Add( m_CompleteListCtrl, 1, wxEXPAND );
@@ -93,17 +90,14 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
     {
         case WXK_UP:
             m_CompleteListCtrl->Select(std::max<int>(0,m_CompleteListCtrl->GetFirstSelected()-1));
-            m_CompleteListCtrl->SetItemBackgroundColour(m_CompleteListCtrl->GetFirstSelected(),wxColor(0,0,255));
             return;
         case WXK_DOWN:
             m_CompleteListCtrl->Select(std::min<int>(m_CompleteListCtrl->GetFirstSelected() + 1, m_CompleteListCtrl->GetItemCount() - 1));
-            m_CompleteListCtrl->SetItemBackgroundColour(m_CompleteListCtrl->GetFirstSelected(),wxColor(0,0,255));
             return;
         case WXK_PAGEUP:
             {
                 int item = std::max<int>(0, m_CompleteListCtrl->GetFirstSelected() - ROW_COUNT);
                 m_CompleteListCtrl->Select(item);
-                m_CompleteListCtrl->SetItemBackgroundColour(item, wxColor(0,0,255));
             }
             return;
         case WXK_PAGEDOWN:
@@ -111,7 +105,6 @@ void CodeCompletePopupWindow::OnKeyDown(wxKeyEvent& event)
                 int item = std::min<int>(m_CompleteListCtrl->GetItemCount() - 1,
                                     m_CompleteListCtrl->GetFirstSelected() + ROW_COUNT);
                 m_CompleteListCtrl->Select(item);
-                m_CompleteListCtrl->SetItemBackgroundColour(item, wxColor(0,0,255));
             }
             return;
         case WXK_TAB:

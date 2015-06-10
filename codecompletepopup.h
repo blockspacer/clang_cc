@@ -64,6 +64,5 @@ private:
 	AutoCompList *m_CompleteListCtrl;
 	wxToolBar* m_FilterToolBar;
 	wxPopupWindow* m_FilterPopup;
-	DECLARE_EVENT_TABLE()
 };
 
