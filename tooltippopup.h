@@ -4,9 +4,10 @@
 class ToolTipPopupWindow : public wxPopupTransientWindow
 {
 public:
-    ToolTipPopupWindow();
+    ToolTipPopupWindow(wxWindow *parent);
     void SetText(wxString tooltip);
 private:
     wxPanel* m_Panel;
     wxStaticText* m_Tooltip;
+    wxBoxSizer* topSizer;
 };

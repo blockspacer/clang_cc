@@ -18,6 +18,7 @@
 
 #include "codecompletion.h"
 #include "codecompletepopup.h"
+#include "tooltippopup.h"
 #include "optionsdlg.h"
 #include "options.h"
 #include "diagnosticprinter.h"
@@ -89,6 +90,7 @@ void ClangCC::OnAttach()
 {
     m_View = new CodeLayoutView(m_Mgr->GetAppWindow(), m_TUManager);
     m_CCPopup = new CodeCompletePopupWindow(m_Mgr->GetAppWindow());
+    m_Tooltip = new ToolTipPopupWindow(m_Mgr->GetAppWindow());
     m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, "Clang_cc");
 
     //Setup logs.
@@ -139,6 +141,8 @@ void ClangCC::OnRelease(bool appShutDown)
         m_View = nullptr;
         m_CCPopup->Destroy();
         m_CCPopup = nullptr;
+        m_Tooltip->Destroy();
+        m_Tooltip = nullptr;
 
         CodeBlocksLogEvent evt(cbEVT_REMOVE_LOG_WINDOW, m_LoggerIndex);
         Manager::Get()->ProcessEvent(evt);
@@ -416,7 +420,9 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
     if (projFile && IsProviderFor(editor))
     {
         cbStyledTextCtrl* control = editor->GetControl();
-        int pos = control->PositionFromPointClose(event.GetX(), event.GetY());
+        wxPoint pnt{event.GetX(),event.GetY()};
+        int pos = control->PositionFromPointClose(pnt.x,pnt.y);
+
         if (pos == wxSCI_INVALID_POSITION)
         {
 
@@ -440,9 +446,14 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
                 unsigned range = Lexer::MeasureTokenLength(loc, tu->getSourceManager(), tu->getASTContext().getLangOpts());
                 if(offset <= pos && pos <= offset + range)
                 {
-                    control->CallTipCancel();
+
                     std::string message = diag.getMessage();
-                    control->CallTipShow(pos, std2wx(message));
+
+                    auto screenPnt = control->ClientToScreen(pnt);
+                    m_Tooltip->Position(screenPnt,wxDefaultSize);
+                    m_Tooltip->SetText(std2wx(message));
+                    m_Tooltip->Show();
+
                     break;
                 }
             }
@@ -461,8 +472,10 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 
         if (!toolTip.empty())
         {
-            control->CallTipCancel();
-            control->CallTipShow(pos, toolTip);
+            auto screenPnt = control->ClientToScreen(pnt);
+            m_Tooltip->Position(screenPnt,wxDefaultSize);
+            m_Tooltip->SetText(toolTip);
+            m_Tooltip->Show();
         }
     }
 }

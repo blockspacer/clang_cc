@@ -24,6 +24,7 @@ class CodeLayoutView;
 class CodeCompletePopupWindow;
 class EditorCodeCompleteConsumer;
 class ccEvent;
+class ToolTipPopupWindow;
 
 extern int idEditorGotoDeclaration;
 extern int idEditorGotoDefinition;
@@ -94,6 +95,7 @@ protected:
 private:
      CodeLayoutView* m_View;
      CodeCompletePopupWindow* m_CCPopup;
+     ToolTipPopupWindow* m_Tooltip;
      std::shared_ptr<EditorCodeCompleteConsumer> m_CCConsumer;
      //Convenience accessor
      Manager* const m_Mgr ;
