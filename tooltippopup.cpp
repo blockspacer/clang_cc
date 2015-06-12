@@ -6,7 +6,7 @@ ToolTipPopupWindow::ToolTipPopupWindow(wxWindow* parent):
     m_Panel = new wxPanel (this,wxID_ANY);
     m_Tooltip = new wxStaticText( m_Panel, wxID_ANY,wxT("empty"));
     topSizer = new wxBoxSizer(wxVERTICAL);
-    topSizer->Add(m_Tooltip, wxALL);
+    topSizer->Add(m_Tooltip, 0, wxEXPAND|wxALL, 3);
     m_Panel->SetSizer(topSizer);
 
 

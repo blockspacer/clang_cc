@@ -2,6 +2,7 @@
 #include <clang/Lex/Lexer.h>
 #include "astnodeutil.h"
 #include "stringio.h"
+
 class ToolTipEvaluator : public boost::static_visitor<wxString>
 {
 public:
@@ -13,7 +14,10 @@ public:
         RawwxStringOstream out;
         if (const NamedDecl* named = dyn_cast_or_null<NamedDecl>(decl))
         {
-            named->printQualifiedName(out, PrintingPolicy(m_Tu->getASTContext().getLangOpts()));
+
+           PrintingPolicy policy(m_Tu->getASTContext().getLangOpts());
+           CodeLayoutDeclarationPrinter printer(out, policy);
+           printer.Visit(named);
 
             for (auto it = decl->redecls_begin(), end = decl->redecls_end(); it != end; ++it)
             {

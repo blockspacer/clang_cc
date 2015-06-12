@@ -425,14 +425,13 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
 
         if (pos == wxSCI_INVALID_POSITION)
         {
-
+            m_Tooltip->Dismiss();
             return;
         }
         ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
         if (!tu)
             return;
 
-        //FIXME Do this better..Maybe our own tooltip
         int isError = control->IndicatorValueAt(GetErrorIndicator(), pos);
         int isWarning = control->IndicatorValueAt(GetWarningIndicator(), pos);
         if (isError || isWarning)
@@ -452,7 +451,7 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
                     auto screenPnt = control->ClientToScreen(pnt);
                     m_Tooltip->Position(screenPnt,wxDefaultSize);
                     m_Tooltip->SetText(std2wx(message));
-                    m_Tooltip->Show();
+                    m_Tooltip->Popup();
 
                     break;
                 }
@@ -475,7 +474,7 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
             auto screenPnt = control->ClientToScreen(pnt);
             m_Tooltip->Position(screenPnt,wxDefaultSize);
             m_Tooltip->SetText(toolTip);
-            m_Tooltip->Show();
+            m_Tooltip->Popup();
         }
     }
 }
