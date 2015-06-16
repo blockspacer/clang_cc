@@ -72,6 +72,7 @@ public:
     void OnEditorActivated(CodeBlocksEvent& event);
     void OnEditorClosed(CodeBlocksEvent& event);
     void OnEditorTooltip(CodeBlocksEvent& event);
+    void OnEditorTooltipCancel(CodeBlocksEvent& event);
     //Timer related events
     void OnEditorActivatedTimer(wxTimerEvent& event);
     void OnReparseTimer(wxTimerEvent& event);

@@ -120,7 +120,7 @@ void ClangCC::OnAttach()
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_MODIFIED,      new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorSaveOrModified));
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_ACTIVATED,     new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorActivated));
     m_Mgr->RegisterEventSink(cbEVT_EDITOR_TOOLTIP,       new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorTooltip));
-
+    m_Mgr->RegisterEventSink(cbEVT_EDITOR_TOOLTIP_CANCEL,new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnEditorTooltipCancel));
     m_Mgr->RegisterEventSink(cbEVT_COMPLETE_CODE,        new cbEventFunctor<ClangCC, CodeBlocksEvent>(this, &ClangCC::OnCodeComplete));
 
     m_TUManager.Bind(ccEVT_PARSE_START, &ClangCC::OnParseStart,this);
@@ -477,6 +477,10 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
             m_Tooltip->Popup();
         }
     }
+}
+void ClangCC::OnEditorTooltipCancel(CodeBlocksEvent& event)
+{
+    m_Tooltip->Dismiss();
 }
 void ClangCC::OnParseStart(ccEvent& event)
 {
