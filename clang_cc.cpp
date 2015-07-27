@@ -309,6 +309,7 @@ int ClangCC::CodeComplete()
                      ccOpts.IncludeCodePatterns, /*include patterns*/
                      true, /*include brief comments*/
                      *m_CCConsumer,
+                     std::make_shared<PCHContainerOperations>(),
                      *helper.m_DiagEngine,helper.m_LangOpts,*helper.m_SourceMgr,
                      *helper.m_FileMgr,helper.m_StoredDiags,helper.m_OwnedBuffers
                      );

@@ -59,7 +59,7 @@ void EditorCodeCompleteConsumer::ProcessCodeCompleteResults(Sema &S,
         }
 
         CodeCompletionString *ccs
-            = Results[i].CreateCodeCompletionString(S, getAllocator(), m_TUInfo, includeBriefComments());
+            = Results[i].CreateCodeCompletionString(S, Context, getAllocator(), m_TUInfo, includeBriefComments());
         //FIXME If cached results are used this fails miserably
 //        switch (Results[i].Kind)
 //        {

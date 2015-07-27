@@ -133,7 +133,9 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
   //  invocation->getHeaderSearchOpts().UseStandardCXXIncludes = true;
     invocation->getHeaderSearchOpts().Verbose=true;
 
-    auto ast = ASTUnit::LoadFromCompilerInvocation(invocation,diags,
+    auto ast = ASTUnit::LoadFromCompilerInvocation(invocation,
+                                                   std::make_shared<PCHContainerOperations>(),
+                                                       diags,
                                                        true, /* OnlyLocalDecls */
                                                        true, /*CaptureDiagnostics*/
                                                        true, /*PrecompilePreamble*/
@@ -231,7 +233,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
     if (!tu)
         tu = ParseProjectFile(file);
 
-    if (!tu || tu->Reparse(remappedFiles))
+    if (!tu || tu->Reparse(std::make_shared<PCHContainerOperations>(), remappedFiles))
          LoggerAccess::Get()->Log("\t Reparsing Failed : "+ file->file.GetFullName());
 
 #ifdef CLANGCC_TIMING
