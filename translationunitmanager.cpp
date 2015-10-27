@@ -122,28 +122,35 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                                                            diags);
 
 
-    PreprocessorOptions &ppOpts = invocation->getPreprocessorOpts();
-    ppOpts.RemappedFilesKeepOriginalName = true;
-    ppOpts.AllowPCHWithCompilerErrors = true;
 
-    invocation->getFrontendOpts().SkipFunctionBodies = Options::Get().ShouldSkipFunctionBodies();
 
-  //  invocation->getHeaderSearchOpts().UseBuiltinIncludes = true;
-  //  invocation->getHeaderSearchOpts().UseStandardSystemIncludes = true;
-  //  invocation->getHeaderSearchOpts().UseStandardCXXIncludes = true;
-    invocation->getHeaderSearchOpts().Verbose=true;
 
-    auto ast = ASTUnit::LoadFromCompilerInvocation(invocation,
-                                                   std::make_shared<PCHContainerOperations>(),
-                                                       diags,
-                                                       true, /* OnlyLocalDecls */
-                                                       true, /*CaptureDiagnostics*/
-                                                       true, /*PrecompilePreamble*/
-                                                       TU_Complete,
-                                                       Options::Get().ShouldCacheCompletionResults(),/*CacheCodeCompletionResults*/
-                                                       true,/* Include Brief Comment*/
-                                                       true  /* User Files are volatile*/
-                                                       ).release();
+
+
+    auto ast = ASTUnit::LoadFromCommandLine(&*argsinChar.begin(),&*argsinChar.end(),
+                                            std::make_shared<PCHContainerOperations>(),
+                                            diags,
+                                            StringRef(),
+                                            true, /* OnlyLocalDecls */
+                                            true, /*CaptureDiagnostics*/
+                                            None, /*Remapped Files*/
+                                            true, /*RemappedFiles keep original name*/
+                                            true, /*Precompile preamble*/
+                                            TU_Complete,
+                                            Options::Get().ShouldCacheCompletionResults(),/*CacheCodeCompletionResults*/
+                                            true, /*Include Brief Comment*/
+                                            true, /*allow pch with compiler errors*/
+
+                                            Options::Get().ShouldSkipFunctionBodies(),
+                                            true,
+                                            false,
+                                            nullptr);
+
+
+
+
+
+
 
 #ifdef CLANGCC_TIMING
     LoggerAccess::Get()->Log(wxString::Format("Parsing %s completed in %ldms", file->file.GetFullName().c_str(), watch.Time()),Logger::info);

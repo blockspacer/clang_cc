@@ -59,6 +59,7 @@
 			<Add option="-fmessage-length=0" />
 			<Add option="-fexceptions" />
 			<Add option="-Winvalid-pch" />
+			<Add option="-Wno-deprecated-declarations" />
 			<Add option="-std=gnu++11" />
 			<Add option="-DBUILDING_PLUGIN" />
 			<Add option="-DHAVE_W32API_H" />
