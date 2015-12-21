@@ -8,6 +8,7 @@
 		<Build>
 			<Target title="debug">
 				<Option output="debug/clang_cc" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../codeblocks_svn/src/devel30_64" />
 				<Option object_output="debug/.objs" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -29,6 +30,7 @@
 			</Target>
 			<Target title="release">
 				<Option output="release/clang_cc" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../codeblocks_svn_release/src/devel30_64" />
 				<Option object_output="release/.objs" />
 				<Option type="3" />
 				<Option compiler="gcc" />

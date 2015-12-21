@@ -143,8 +143,8 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
                                             Options::Get().ShouldSkipFunctionBodies(),
                                             true,
-                                            false,
-                                            nullptr);
+                                            false
+                                           );
 
 
 

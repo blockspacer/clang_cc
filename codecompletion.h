@@ -18,6 +18,7 @@ enum CodeCompleteSortType
     Priority
 };
 using namespace llvm;
+
 // Helper class for passing parameters to ASTUnit.CodeComplete
 struct CodeCompleteResultHelper
 {
@@ -53,7 +54,7 @@ struct CodeCompleteResultHolder
 class EditorCodeCompleteConsumer : public clang::CodeCompleteConsumer
 {
 public:
-    EditorCodeCompleteConsumer(const CodeCompleteOptions& ccOpts,CodeCompletePopupWindow* ccPopup);
+    EditorCodeCompleteConsumer(const clang::CodeCompleteOptions& ccOpts,CodeCompletePopupWindow* ccPopup);
     virtual void ProcessCodeCompleteResults(clang::Sema &S,
                                             clang::CodeCompletionContext Context,
                                             clang::CodeCompletionResult* Results,
