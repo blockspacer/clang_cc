@@ -59,15 +59,15 @@ CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
 	m_TreeCtrl->AddRoot("root");
 	//Setup events
 
-	GetParent()->Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
-	GetParent()->Bind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
+	//GetParent()->Bind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+//	GetParent()->Bind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 
 }
 
 CodeLayoutView::~CodeLayoutView()
 {
-    GetParent()->Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
-    GetParent()->Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
+//    GetParent()->Unbind(ccEVT_PARSE_END,&CodeLayoutView::OnParseEnd,this);
+//    GetParent()->Unbind(ccEVT_REPARSE_END,&CodeLayoutView::OnParseEnd,this);
 }
 wxTreeItemId CodeLayoutView::AddNode(wxString name,clang::Decl* node, clang::Decl* parent)
 {
