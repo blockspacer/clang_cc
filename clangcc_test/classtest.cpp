@@ -44,6 +44,10 @@ int Deneme::virtul( Deneme n )
 {
   return 3;
 }
+void Deneme::sil4()
+{
+
+}
 
 
 int Deneme::virtul(float n,int z){return 3;}

@@ -7,7 +7,7 @@ class IntrusiveRefCntPtr
 
     template <typename Z>
     IntrusiveRefCntPtr(Z ff){}
-    ~IntrusiveRefCntPtr();
+    ~IntrusiveRefCntPtr() = default;
     template <typename Tur, int a>
     void foo(Tur sd){}
 

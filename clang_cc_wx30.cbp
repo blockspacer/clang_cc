@@ -117,24 +117,6 @@
 		<Unit filename="ASTnodefinder.cpp" />
 		<Unit filename="ASTnodefinder.h" />
 		<Unit filename="TODO.txt" />
-		<Unit filename="TestFiles/boost_type_erasure.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="TestFiles/classtest.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
-		<Unit filename="TestFiles/classtest.h" />
-		<Unit filename="TestFiles/headerfile.h" />
-		<Unit filename="TestFiles/sil.cpp">
-			<Option link="0" />
-		</Unit>
-		<Unit filename="TestFiles/template_test.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
 		<Unit filename="astnodeutil.cpp" />
 		<Unit filename="astnodeutil.h" />
 		<Unit filename="autocomplist.cpp" />
