@@ -92,7 +92,7 @@ public:
     CodeLayoutView* GetLayoutView() {return m_View;}
 protected:
     virtual void OnAttach();
-    virtual void OnRelease(bool appShutDown);
+    virtual void OnRelease(bool appShutDown) override;
 private:
      CodeLayoutView* m_View;
      CodeCompletePopupWindow* m_CCPopup;
