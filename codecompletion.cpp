@@ -9,7 +9,7 @@ using boost::bind;
 using namespace clang;
 EditorCodeCompleteConsumer::EditorCodeCompleteConsumer(const CodeCompleteOptions& ccOpts,CodeCompletePopupWindow* ccPopup):
     CodeCompleteConsumer(ccOpts,false),
-    m_TUInfo(new GlobalCodeCompletionAllocator),
+    m_TUInfo(std::make_shared<GlobalCodeCompletionAllocator>()),
     m_SortType(Priority),
     m_CcPopup(ccPopup)
 {}

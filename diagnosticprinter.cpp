@@ -70,7 +70,6 @@ void DiagnosticPrinter::MarkOnEditors()
             cbStyledTextCtrl* control = editor->GetControl();
             unsigned offset = srcMgr.getFileOffset(loc);
             unsigned selRange = Lexer::MeasureTokenLength(loc, srcMgr, m_TU->getASTContext().getLangOpts());
-
             switch(level)
             {
                 case DiagnosticsEngine::Error :

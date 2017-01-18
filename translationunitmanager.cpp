@@ -19,6 +19,7 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Lex/Preprocessor.h>
+#include <clang/Lex/PreprocessorOptions.h>
 
 #include "wx/jsonval.h"
 #include "wx/jsonwriter.h"
@@ -118,7 +119,7 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     DiagnosticOptions* diagOpts = new DiagnosticOptions();
     IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
 
-    CompilerInvocation* invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(argsinChar),
+    auto invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(argsinChar),
                                                                            diags);
 
 
