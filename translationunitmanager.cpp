@@ -119,15 +119,6 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
     DiagnosticOptions* diagOpts = new DiagnosticOptions();
     IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
 
-    auto invocation = clang::createInvocationFromCommandLine(llvm::makeArrayRef(argsinChar),
-                                                                           diags);
-
-
-
-
-
-
-
     auto ast = ASTUnit::LoadFromCommandLine(&*argsinChar.begin(),&*argsinChar.end(),
                                             std::make_shared<PCHContainerOperations>(),
                                             diags,
@@ -146,12 +137,6 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
                                             true,
                                             false
                                            );
-
-
-
-
-
-
 
 #ifdef CLANGCC_TIMING
     LoggerAccess::Get()->Log(wxString::Format("Parsing %s completed in %ldms", file->file.GetFullName().c_str(), watch.Time()),Logger::info);
