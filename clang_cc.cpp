@@ -405,10 +405,6 @@ void ClangCC::OnEditorActivatedTimer(wxTimerEvent& event)
             t.detach();
 
         }
-        if (tu)
-        {
-            m_View->SetActiveFile(editor->GetFilename(),tu);
-        }
     }
 }
 void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
