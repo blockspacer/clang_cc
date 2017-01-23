@@ -39,7 +39,8 @@
 
 using namespace clang;
 TranslationUnitManager::TranslationUnitManager(ClangCC& CC):
-    m_CC(CC)
+    m_CC(CC),
+    m_PCHContainerOps(std::make_shared<PCHContainerOperations>())
 {}
 
 bool TranslationUnitManager::AddASTUnitForProjectFile(ProjectFile* file, ASTUnit* tu)
@@ -118,24 +119,25 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
     DiagnosticOptions* diagOpts = new DiagnosticOptions();
     IntrusiveRefCntPtr<DiagnosticsEngine> diags = CompilerInstance::createDiagnostics(diagOpts,0);
+    diags->setFatalsAsError(true);
 
     auto ast = ASTUnit::LoadFromCommandLine(&*argsinChar.begin(),&*argsinChar.end(),
-                                            std::make_shared<PCHContainerOperations>(),
+                                            m_PCHContainerOps,
                                             diags,
                                             StringRef(),
                                             true, /* OnlyLocalDecls */
                                             true, /*CaptureDiagnostics*/
                                             None, /*Remapped Files*/
                                             true, /*RemappedFiles keep original name*/
-                                            true, /*Precompile preamble*/
+                                            1, /*Precompile preamble*/
                                             TU_Complete,
                                             Options::Get().ShouldCacheCompletionResults(),/*CacheCodeCompletionResults*/
                                             true, /*Include Brief Comment*/
                                             true, /*allow pch with compiler errors*/
-
                                             Options::Get().ShouldSkipFunctionBodies(),
                                             true,
-                                            false
+                                            false,
+                                            m_PCHContainerOps->getRawReader().getFormat()
                                            );
 
 #ifdef CLANGCC_TIMING
@@ -226,7 +228,7 @@ ASTUnit* TranslationUnitManager::ReparseProjectFile(ProjectFile* file)
     if (!tu)
         tu = ParseProjectFile(file);
 
-    if (!tu || tu->Reparse(std::make_shared<PCHContainerOperations>(), remappedFiles))
+    if (!tu || tu->Reparse(m_PCHContainerOps, remappedFiles))
          LoggerAccess::Get()->Log("\t Reparsing Failed : "+ file->file.GetFullName());
 
 #ifdef CLANGCC_TIMING

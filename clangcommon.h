@@ -24,10 +24,12 @@
 
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/ASTUnit.h>
+#include <clang/Frontend/PCHContainerOperations.h>
 #include <clang/Sema/CodeCompleteConsumer.h>
 
 #include <clang/Lex/Lexer.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
+
 
 
 #pragma pop_macro("_")

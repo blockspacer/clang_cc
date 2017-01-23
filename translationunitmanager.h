@@ -17,10 +17,6 @@
 
 class ClangCC;
 
-
-
-
-
 enum ASTUnitMemoryUsageKind
 {
     AST_Nodes,
@@ -73,6 +69,7 @@ private:
     std::mutex m_ProjectsMapMutex;
     std::mutex m_FilesBeingParsedMutex;
     std::map<cbProject*,std::unique_ptr<clang::tooling::CompilationDatabase>> m_CompilationDatabases;
+    std::shared_ptr<clang::PCHContainerOperations> m_PCHContainerOps;
 };
 
 #endif // TRANSLATIONUNITMANAGER_H_
