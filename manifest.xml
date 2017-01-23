@@ -4,7 +4,7 @@
     <Plugin name="clang_cc">
         <Value title="clang_cc" />
         <Value version="0.1" />
-        <Value description="" />
+        <Value description="Clang Code Completion plugin" />
         <Value author="hurcan solter" />
         <Value authorEmail="" />
         <Value authorWebsite="" />

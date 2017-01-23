@@ -7,11 +7,11 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="debug">
-				<Option output="debug/clang_cc" prefix_auto="1" extension_auto="1" />
+				<Option output="debug/clang_cc" prefix_auto="0" extension_auto="1" />
 				<Option object_output="debug/.objs" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option host_application="$(#cb)/devel30_64/codeblocks.exe" />
+				<Option host_application="/opt/codeblocks/bin/codeblocks" />
 				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-g" />
@@ -54,14 +54,13 @@
 			</Environment>
 		</Build>
 		<Compiler>
-			<Add option="-ansi" />
+			<Add option="-fPIC" />
 			<Add option="-pipe" />
 			<Add option="-fmessage-length=0" />
 			<Add option="-fexceptions" />
 			<Add option="-Winvalid-pch" />
 			<Add option="`wx-config --cxxflags`" />
 			<Add option="-I`llvm-config --includedir`" />
-			<Add option="-fPIC" />
 			<Add option="-DCB_PRECOMP" />
 			<Add option="-DWX_PRECOMP" />
 			<Add option="-D__STDC_CONSTANT_MACROS" />
@@ -69,14 +68,14 @@
 			<Add option="-DCLANGCC_TIMING" />
 			<Add option="-DBOOST_RANGE_ENABLE_CONCEPT_ASSERT=0" />
 			<Add directory="$(#cb)/include/codeblocks" />
+			<Add directory="$(#cb)/include/codeblocks/tinyxml" />
 			<Add directory="$(#cb)/include/codeblocks/wxscintilla/include" />
+			<Add directory="wxjson" />
 		</Compiler>
 		<Linker>
-			<Add option="-Wl,--enable-auto-image-base" />
-			<Add option="-Wl,--add-stdcall-alias" />
-			<Add option="-Wl,--enable-auto-import" />
 			<Add option="-Wl,--no-undefined" />
-			<Add option="-mthreads" />
+			<Add option="`wx-config --libs`" />
+			<Add option="`wx-config --libs aui`" />
 			<Add option="-lclangTooling" />
 			<Add option="-lclangFrontendTool" />
 			<Add option="-lclangFrontend" />
@@ -99,7 +98,6 @@
 			<Add library="codeblocks" />
 			<Add library="dl" />
 			<Add library="z" />
-			<Add library="tinfo" />
 			<Add directory="$(#cb)/lib" />
 		</Linker>
 		<Unit filename="../mycpp_vc - Copy/mycpp_vc/testdeclreference.cpp">
