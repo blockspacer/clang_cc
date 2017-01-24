@@ -68,8 +68,8 @@ ASTUnit* TranslationUnitManager::ParseProjectFile(ProjectFile* file,bool allowAd
 
     {   //if the file is already being parsed return immediately.
         std::lock_guard<std::mutex> lock(m_FilesBeingParsedMutex);
-        auto it = std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file);
-        if (it != m_FilesBeingParsed.end())
+
+        if (std::find(m_FilesBeingParsed.begin(), m_FilesBeingParsed.end(), file) != m_FilesBeingParsed.end())
             return nullptr;
         m_FilesBeingParsed.push_back(file);
     }
