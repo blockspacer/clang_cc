@@ -39,13 +39,13 @@ public:
                 m_Out << "null";
                 break;
             case TemplateArgument::Type:
-             //   arg.getAsType().getUnqualifiedType().print(m_Out, m_Policy);
+                arg.getAsType().getUnqualifiedType().print(m_Out, m_Policy);
                 break;
             case TemplateArgument::Declaration:
-            //    m_Out << arg.getAsDecl()->getNameAsString();
+                m_Out << arg.getAsDecl()->getNameAsString();
                 break;
             case TemplateArgument::Integral:
-            //    m_Out << arg.getAsIntegral();
+                m_Out << arg.getAsIntegral();
                 break;
             case TemplateArgument::NullPtr:
                 m_Out << "nullptr";
