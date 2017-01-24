@@ -88,10 +88,11 @@ ClangCC::~ClangCC()
 
 void ClangCC::OnAttach()
 {
-    m_View = new CodeLayoutView(m_Mgr->GetAppWindow(), m_TUManager);
     m_CCPopup = new CodeCompletePopupWindow(m_Mgr->GetAppWindow());
     m_Tooltip = new ToolTipPopupWindow(m_Mgr->GetAppWindow());
-    m_Mgr->GetProjectManager()->GetUI().GetNotebook()->AddPage(m_View, "Clang_cc");
+    auto notebook = m_Mgr->GetProjectManager()->GetUI().GetNotebook();
+    m_View = new CodeLayoutView(notebook, m_TUManager);
+    notebook->AddPage(m_View, "Clang_cc");
 
     //Setup logs.
 
