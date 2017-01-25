@@ -41,7 +41,7 @@ END_EVENT_TABLE()
 
 using namespace clang;
 CodeLayoutView::CodeLayoutView(wxWindow* parent, TranslationUnitManager& tm):
-    wxPanel(parent), m_TUManager(tm)
+    m_TUManager(tm)
 {
 	//Initialize(LayoutView)
 	wxBoxSizer* BoxSizer1;
