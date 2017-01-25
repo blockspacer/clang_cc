@@ -415,65 +415,64 @@ void ClangCC::OnEditorTooltip(CodeBlocksEvent& event)
     if (!editor)
         return;
     ProjectFile* projFile = editor->GetProjectFile();
-    if (projFile && IsProviderFor(editor))
+    if (!projFile || !IsProviderFor(editor))
+        return;
+    cbStyledTextCtrl* control = editor->GetControl();
+    wxPoint pnt{event.GetX(),event.GetY()};
+    int pos = control->PositionFromPointClose(pnt.x,pnt.y);
+
+    if (pos == wxSCI_INVALID_POSITION)
     {
-        cbStyledTextCtrl* control = editor->GetControl();
-        wxPoint pnt{event.GetX(),event.GetY()};
-        int pos = control->PositionFromPointClose(pnt.x,pnt.y);
+        m_Tooltip->Dismiss();
+        return;
+    }
+    ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
+    if (!tu)
+        return;
 
-        if (pos == wxSCI_INVALID_POSITION)
+    int isError = control->IndicatorValueAt(GetErrorIndicator(), pos);
+    int isWarning = control->IndicatorValueAt(GetWarningIndicator(), pos);
+    if (isError || isWarning)
+    {
+        auto it = tu->stored_diag_begin();
+        for ( ; it != tu->stored_diag_end(); ++it)
         {
-            m_Tooltip->Dismiss();
-            return;
-        }
-        ASTUnit* tu = m_TUManager.GetASTUnitForProjectFile(projFile);
-        if (!tu)
-            return;
-
-        int isError = control->IndicatorValueAt(GetErrorIndicator(), pos);
-        int isWarning = control->IndicatorValueAt(GetWarningIndicator(), pos);
-        if (isError || isWarning)
-        {
-            auto it = tu->stored_diag_begin();
-            for ( ; it != tu->stored_diag_end(); ++it)
+            StoredDiagnostic diag = *it;
+            FullSourceLoc loc = diag.getLocation();
+            unsigned offset = loc.getDecomposedLoc().second;
+            unsigned range = Lexer::MeasureTokenLength(loc, tu->getSourceManager(), tu->getASTContext().getLangOpts());
+            if(offset <= pos && pos <= offset + range)
             {
-                StoredDiagnostic diag = *it;
-                FullSourceLoc loc = diag.getLocation();
-                unsigned offset = loc.getDecomposedLoc().second;
-                unsigned range = Lexer::MeasureTokenLength(loc, tu->getSourceManager(), tu->getASTContext().getLangOpts());
-                if(offset <= pos && pos <= offset + range)
-                {
 
-                    std::string message = diag.getMessage();
+                std::string message = diag.getMessage();
 
-                    auto screenPnt = control->ClientToScreen(pnt);
-                    m_Tooltip->Position(screenPnt,wxDefaultSize);
-                    m_Tooltip->SetText(std2wx(message));
-                    m_Tooltip->Popup();
+                auto screenPnt = control->ClientToScreen(pnt);
+                m_Tooltip->Position(screenPnt,wxDefaultSize);
+                m_Tooltip->SetText(std2wx(message));
+                m_Tooltip->Popup();
 
-                    break;
-                }
+                break;
             }
-            return;
         }
-        wxString toolTip;
-        if (!m_TUManager.IsFileBeingParsed(projFile))
-        {
-            ASTNodeFinder finder(tu);
-            NodeType node = finder.GetASTNode(wx2std(projFile->file.GetFullPath()), pos);
-            ToolTipEvaluator ttEval(tu);
-            toolTip = boost::apply_visitor(ttEval, node);
-        }
-        else
-            toolTip = "The file is still being parsed.";
+        return;
+    }
+    wxString toolTip;
+    if (!m_TUManager.IsFileBeingParsed(projFile))
+    {
+        ASTNodeFinder finder(tu);
+        NodeType node = finder.GetASTNode(wx2std(projFile->file.GetFullPath()), pos);
+        ToolTipEvaluator ttEval(tu);
+        toolTip = boost::apply_visitor(ttEval, node);
+    }
+    else
+        toolTip = "The file is still being parsed.";
 
-        if (!toolTip.empty())
-        {
-            auto screenPnt = control->ClientToScreen(pnt);
-            m_Tooltip->Position(screenPnt,wxDefaultSize);
-            m_Tooltip->SetText(toolTip);
-            m_Tooltip->Popup();
-        }
+    if (!toolTip.empty())
+    {
+        auto screenPnt = control->ClientToScreen(pnt);
+        m_Tooltip->Position(screenPnt,wxDefaultSize);
+        m_Tooltip->SetText(toolTip);
+        m_Tooltip->Popup();
     }
 }
 void ClangCC::OnEditorTooltipCancel(CodeBlocksEvent& event)

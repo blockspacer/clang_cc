@@ -23,7 +23,7 @@ void Options::Populate()
     m_StringFilter = (StringFilterType) cfg->ReadInt("/pop_string_filter_type", 0);
     m_CaseInsensitiveFilter = cfg->ReadBool("/pop_case_insensitive_filter", 0);
     //Translation Unit Options
-    m_SkipFunctionBodies = cfg->ReadBool("/tu_skip_function_bodies");
+    m_SkipFunctionBodies = cfg->ReadBool("/tu_skip_function_bodies", true);
     m_SpellCheck = cfg->ReadBool("/tu_spell_check");
     wxArrayString clangOptions;
     cfg->Read("/tu_clang_options", &clangOptions);
