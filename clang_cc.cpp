@@ -284,10 +284,10 @@ int ClangCC::CodeComplete()
     logstring << "Code Complete at : "<<editor->GetShortName() << ":"<< line <<":"<<column;
     LoggerAccess::Get()->Log(logstring);
     int length = control->GetTextLength();
-    llvm::MemoryBuffer* membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName).release();
+    std::unique_ptr<llvm::MemoryBuffer> membuf = llvm::MemoryBuffer::getNewUninitMemBuffer(length+1,fileName);
     control->SendMsg(SCI_GETTEXT, length+1, (wxUIntPtr)membuf->getBufferStart());
 
-    ASTUnit::RemappedFile remap = std::make_pair(fileName,membuf);
+    ASTUnit::RemappedFile remap = std::make_pair(fileName,membuf.get());
     CodeCompleteResultHelper helper(tu->getFileSystemOpts());
     CCListedResultTypes shownTypes = Options::Get().GetListedResultTypes();
     CodeCompleteOptions ccOpts;

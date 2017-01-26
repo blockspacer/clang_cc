@@ -174,7 +174,6 @@
 		<Unit filename="wxjson/wx/jsonreader.h" />
 		<Unit filename="wxjson/wx/jsonval.h" />
 		<Unit filename="wxjson/wx/jsonwriter.h" />
-		<Unit filename="wxsmith/SymbolBrowser.wxs" />
 		<Extensions>
 			<code_completion>
 				<search_path add="E:\c++11.denemeler\clang_cc\" />
