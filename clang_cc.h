@@ -25,6 +25,7 @@ class CodeCompletePopupWindow;
 class EditorCodeCompleteConsumer;
 class ccEvent;
 class ToolTipPopupWindow;
+class DiagnosticListView;
 
 extern int idEditorGotoDeclaration;
 extern int idEditorGotoDefinition;
@@ -103,6 +104,7 @@ private:
      TranslationUnitManager m_TUManager;
      int m_LoggerIndex; // Index of Logger in LogManager
      int m_EditorHookId;
+     DiagnosticListView* m_DiagnosticsLogger;
      std::vector<ASTUnit*> m_TUsBeingParsed;
 
      /** Delay after receive editor activated event*/

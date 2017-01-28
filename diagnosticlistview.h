@@ -6,7 +6,9 @@
 
 class DiagnosticListView : public ListCtrlLogger
 {
+public:
     DiagnosticListView(const wxArrayString& titles, const wxArrayInt& widths, bool fixedPitchFont = false);
+    ~DiagnosticListView();
 
 };
 

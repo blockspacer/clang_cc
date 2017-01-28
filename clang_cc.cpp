@@ -22,6 +22,7 @@
 #include "optionsdlg.h"
 #include "options.h"
 #include "diagnosticprinter.h"
+#include "diagnosticlistview.h"
 #include "ASTnodefinder.h"
 #include "contextmenubuilder.h"
 #include "tooltipevaluator.h"
@@ -105,6 +106,24 @@ void ClangCC::OnAttach()
     CodeBlocksLogEvent evt(cbEVT_ADD_LOG_WINDOW, m_LoggerIndex, logMgr->Slot(m_LoggerIndex).title, logMgr->Slot(m_LoggerIndex).icon);
     Manager::Get()->ProcessEvent(evt);
 
+    wxArrayString titles;
+    titles.Add(_("Severity"));
+    titles.Add(_("Description"));
+    titles.Add(_("File"));
+
+    wxArrayInt widths;
+    widths.Add(30);
+    widths.Add(640);
+    widths.Add(128);
+
+    m_DiagnosticsLogger = new DiagnosticListView(titles,widths);
+    auto index = logMgr->SetLog(m_DiagnosticsLogger);
+    logMgr->Slot(index).title = _("Clang Diagnostics");
+
+    CodeBlocksLogEvent evt2(cbEVT_ADD_LOG_WINDOW, index, logMgr->Slot(index).title, logMgr->Slot(index).icon);
+    Manager::Get()->ProcessEvent(evt2);
+
+
     //Read options
     Options::Get().Populate();
     //Setup event handlers
@@ -147,6 +166,13 @@ void ClangCC::OnRelease(bool appShutDown)
 
         CodeBlocksLogEvent evt(cbEVT_REMOVE_LOG_WINDOW, m_LoggerIndex);
         Manager::Get()->ProcessEvent(evt);
+
+        CodeBlocksLogEvent evt2(cbEVT_REMOVE_LOG_WINDOW, m_DiagnosticsLogger);
+        Manager::Get()->ProcessEvent(evt2);
+
+
+
+
 
 
         m_TUManager.Unbind(ccEVT_PARSE_START, &ClangCC::OnParseStart,this);

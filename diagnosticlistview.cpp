@@ -1,4 +1,5 @@
 #include "diagnosticlistview.h"
+#include <wx/listctrl.h>
 
 
 DiagnosticListView::DiagnosticListView(const wxArrayString& titles,
@@ -7,4 +8,8 @@ DiagnosticListView::DiagnosticListView(const wxArrayString& titles,
     ListCtrlLogger(titles, widths, fixedPitchFont)
 {
 
+}
+DiagnosticListView::~DiagnosticListView()
+{
+    this->control->Destroy();
 }
