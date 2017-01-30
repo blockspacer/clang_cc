@@ -11,5 +11,5 @@ DiagnosticListView::DiagnosticListView(const wxArrayString& titles,
 }
 DiagnosticListView::~DiagnosticListView()
 {
-    this->control->Destroy();
+
 }
