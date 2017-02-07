@@ -3,10 +3,10 @@
 
 // interface is macroed somewhere in mingw
 // not exactly portable but works for gcc,MSVC and clang
-#pragma push_macro("interface")
-#pragma push_macro("_")
-#undef interface
-#undef _
+//#pragma push_macro("interface")
+//#pragma push_macro("_")
+//#undef interface
+//#undef _
 
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -32,7 +32,7 @@
 
 
 
-#pragma pop_macro("_")
-#pragma pop_macro("interface")
+//#pragma pop_macro("_")
+//#pragma pop_macro("interface")
 
 #endif // CLANGCOMMON_H_INCLUDED
