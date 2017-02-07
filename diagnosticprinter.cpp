@@ -7,6 +7,7 @@
 #include <logmanager.h>
 #include "stringio.h"
 #include "clangcclogger.h"
+#include "translationunitmanager.h"
 
 DiagnosticPrinter::DiagnosticPrinter(ASTUnit* tu):
     m_TU(tu)
@@ -36,6 +37,7 @@ void DiagnosticPrinter::MarkOnEditors()
     for (; it != m_TU->stored_diag_end(); ++it)
     {
         StoredDiagnostic diag = *it;
+        auto saDiag = TranslationUnitManager::MakeStandaloneDiagnostic(m_TU,*it);
         FullSourceLoc loc = diag.getLocation();
 
         DiagnosticsEngine::Level level= diag.getLevel();
@@ -63,6 +65,7 @@ void DiagnosticPrinter::MarkOnEditors()
             const SourceManager& srcMgr = loc.getManager();
             LoggerAccess::Get()->Log(std2wx(loc.printToString(srcMgr)), diagLevel);
             std::string fileName = srcMgr.getFilename(loc);
+
 
             cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinEditor(std2wx(fileName));
             if(!editor)

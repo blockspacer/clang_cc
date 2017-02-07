@@ -42,8 +42,8 @@ struct ASTMemoryUsage
 };
 
 using clang::ASTUnit;
-using ParserMapType = std::map<wxString,std::shared_ptr<clang::ASTUnit>>;
-class TranslationUnitManager:public wxEvtHandler , public wxThreadHelper
+using ParserMapType = std::map<wxString,std::shared_ptr<ASTUnit>>;
+class TranslationUnitManager:public wxEvtHandler
 {
 public:
     TranslationUnitManager(ClangCC& CC);
@@ -57,11 +57,13 @@ public:
     bool CreateCompilationDatabase(cbProject* proj);
     std::vector<ASTMemoryUsage> GetMemoryUsageForProjectFile(ProjectFile* file);
     void RemoveProject(cbProject* project);
+
     void RemoveFile(cbProject* project,const wxString& fileName);
     void OnProjectOpened(CodeBlocksEvent& event);
     void Clear();
-private:
-    void* Entry() override;
+
+    static ASTUnit::StandaloneDiagnostic
+    MakeStandaloneDiagnostic(ASTUnit* tu, const clang::StoredDiagnostic& InDiag);
 private:
     std::map<cbProject*,ParserMapType> m_ProjectTranslationUnits;
     std::vector<ProjectFile*> m_FilesBeingParsed;

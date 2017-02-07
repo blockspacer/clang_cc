@@ -1,13 +1,6 @@
 #ifndef CLANGCOMMON_H_
 #define CLANGCOMMON_H_
 
-// interface is macroed somewhere in mingw
-// not exactly portable but works for gcc,MSVC and clang
-//#pragma push_macro("interface")
-//#pragma push_macro("_")
-//#undef interface
-//#undef _
-
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/MemoryBuffer.h>
 
@@ -29,10 +22,5 @@
 
 #include <clang/Lex/Lexer.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
-
-
-
-//#pragma pop_macro("_")
-//#pragma pop_macro("interface")
 
 #endif // CLANGCOMMON_H_INCLUDED

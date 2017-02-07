@@ -1,5 +1,4 @@
 #pragma once
-#include <clang/AST/Decl.h>
 #include "ASTnodefinder.h"
 namespace ASTNode
 {

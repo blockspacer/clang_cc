@@ -361,6 +361,48 @@ void TranslationUnitManager::OnProjectOpened(CodeBlocksEvent& event)
 
 }
 
-void* TranslationUnitManager::Entry()
-{
+static std::pair<unsigned, unsigned>
+makeStandaloneRange(CharSourceRange Range, const SourceManager &SM,
+                    const LangOptions &LangOpts) {
+  CharSourceRange FileRange = Lexer::makeFileCharRange(Range, SM, LangOpts);
+  unsigned Offset = SM.getFileOffset(FileRange.getBegin());
+  unsigned EndOffset = SM.getFileOffset(FileRange.getEnd());
+  return std::make_pair(Offset, EndOffset);
 }
+
+static ASTUnit::StandaloneFixIt makeStandaloneFixIt(const SourceManager &SM,
+                                                    const LangOptions &LangOpts,
+                                                    const FixItHint &InFix) {
+  ASTUnit::StandaloneFixIt OutFix;
+  OutFix.RemoveRange = makeStandaloneRange(InFix.RemoveRange, SM, LangOpts);
+  OutFix.InsertFromRange = makeStandaloneRange(InFix.InsertFromRange, SM,
+                                               LangOpts);
+  OutFix.CodeToInsert = InFix.CodeToInsert;
+  OutFix.BeforePreviousInsertions = InFix.BeforePreviousInsertions;
+  return OutFix;
+}
+ASTUnit::StandaloneDiagnostic
+TranslationUnitManager::MakeStandaloneDiagnostic(ASTUnit* tu,
+                         const StoredDiagnostic &InDiag) {
+  ASTUnit::StandaloneDiagnostic OutDiag;
+  const LangOptions& LangOpts = tu->getASTContext().getLangOpts();
+  OutDiag.ID = InDiag.getID();
+  OutDiag.Level = InDiag.getLevel();
+  OutDiag.Message = InDiag.getMessage();
+  OutDiag.LocOffset = 0;
+  if (InDiag.getLocation().isInvalid())
+    return OutDiag;
+  const SourceManager &SM = InDiag.getLocation().getManager();
+  SourceLocation FileLoc = SM.getFileLoc(InDiag.getLocation());
+  OutDiag.Filename = SM.getFilename(FileLoc);
+  if (OutDiag.Filename.empty())
+    return OutDiag;
+  OutDiag.LocOffset = SM.getFileOffset(FileLoc);
+  for (const CharSourceRange &Range : InDiag.getRanges())
+    OutDiag.Ranges.push_back(makeStandaloneRange(Range, SM, LangOpts));
+  for (const FixItHint &FixIt : InDiag.getFixIts())
+    OutDiag.FixIts.push_back(makeStandaloneFixIt(SM, LangOpts, FixIt));
+
+  return OutDiag;
+}
+

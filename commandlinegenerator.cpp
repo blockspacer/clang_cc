@@ -42,7 +42,7 @@ wxArrayString CommandLineGenerator::GetCompileFileCommand(ProjectBuildTarget* ta
                        : m_Compiler;
     if (!compiler)
     {
-        Manager::Get()->GetLogManager()->DebugLog("Can't access compiler for file.");
+        LoggerAccess::Get()->Log("Can't access compiler for file.");
         return ret;
     }
 
